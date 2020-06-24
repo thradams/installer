@@ -29,11 +29,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="installer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="installer.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
@@ -48,5 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="teste.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="installer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
