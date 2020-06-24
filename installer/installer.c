@@ -158,7 +158,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 #include <windows.h>
 #include <stdio.h>
 #include "resource.h"
-#include "zlib.h"
+//#include "zlib.h"
 
 const char* LoadFileInResource(int name, int type, DWORD* size)
 {
