@@ -3,3 +3,5 @@
 ################################################################################
 
 /installer/Release
+/installer/Debug
+/installer/.vs/installer/v16
