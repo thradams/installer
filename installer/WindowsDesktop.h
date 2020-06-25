@@ -2,6 +2,8 @@
 #include <Windows.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <commctrl.h>
+
 #define ASSERT assert
 
 extern HINSTANCE s_hInstance;
@@ -76,6 +78,7 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
       SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)p);\
       p->m_hDlg = hWnd;\
       CenterWindow(hWnd, p->m_hParent);\
+      JOIN(DIALOGNAME, _OnInit)(p);\
       return (INT_PTR)FALSE; \
   }\
   else\

@@ -174,6 +174,10 @@ struct AboutDlg
     HWND m_hParent;
 };
 
+void AboutDlg_OnInit(struct AboutDlg* p)
+{
+    Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
+}
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 {
