@@ -80,7 +80,7 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
   }\
   else\
   {\
-    pThis = (struct DIALOGNAME*)GetWindowLongPtr(hWnd, GWLP_USERDATA);\
+    pThis = (struct MainWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);\
   }\
  if (!pThis)\
  {\
@@ -239,13 +239,9 @@ struct DLGITEMTEMPLATEEX
         JOIN(N, _OnDestroy)(pThis);\
     break;
 
- #define ON_COMMAND(N)\
+#define ON_COMMAND(N)\
   case WM_COMMAND:\
       JOIN(N, _OnCommand)(pThis, LOWORD(wParam), HIWORD(wParam), (HWND)lParam); \
  break;
 
-INT_PTR ShowPropertySheet(HINSTANCE hInstance,
-                          HWND hwndParent,
-                          const wchar_t* pszCaption,
-                          PROPSHEETPAGE** pages,
-                          size_t nPages);
+BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);

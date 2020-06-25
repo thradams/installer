@@ -63,6 +63,9 @@
     <ClCompile Include="WindowsDesktop.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="installer_test.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="foo.zip" />

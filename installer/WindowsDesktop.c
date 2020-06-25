@@ -1,4 +1,6 @@
 #include "WindowsDesktop.h"
+#include <shlobj_core.h>
+#include <Shlobj.h>
 
 #pragma comment(lib, "Comctl32.lib")
 
@@ -22,46 +24,46 @@ struct DialogTemplate
 
 void DrawBitmap(HDC hdc, HBITMAP hbm, int Left, int Top)
 {
-  BOOL f;
-  HDC hdcBits;
-  BITMAP bm;
-  hdcBits = CreateCompatibleDC(hdc);
-  GetObject(hbm, sizeof(BITMAP), &bm);
-  SelectObject(hdcBits, hbm);
-  f = BitBlt(hdc, Left, Top, bm.bmWidth, bm.bmHeight, hdcBits, 0, 0, SRCCOPY);
-  DeleteDC(hdcBits);
+    BOOL f;
+    HDC hdcBits;
+    BITMAP bm;
+    hdcBits = CreateCompatibleDC(hdc);
+    GetObject(hbm, sizeof(BITMAP), &bm);
+    SelectObject(hdcBits, hbm);
+    f = BitBlt(hdc, Left, Top, bm.bmWidth, bm.bmHeight, hdcBits, 0, 0, SRCCOPY);
+    DeleteDC(hdcBits);
 }
 
 
 void DrawImage(HDC hdc, RECT rc, LPCWSTR pszResourceName)
 {
-  UINT type = LR_CREATEDIBSECTION | LR_DEFAULTCOLOR;//LR_CREATEDIBSECTION | LR_DEFAULTSIZE;
-  HBITMAP hBitmap = 0;
-  hBitmap = (HBITMAP)LoadImage(GetModuleHandle(0),
-                               pszResourceName,
-                               IMAGE_BITMAP,
-                               0,
-                               0,
-                               type);
-  if (hBitmap)
-  {
-    BITMAP bm;
-    GetObject(hBitmap, sizeof(BITMAP), &bm);
+    UINT type = LR_CREATEDIBSECTION | LR_DEFAULTCOLOR;//LR_CREATEDIBSECTION | LR_DEFAULTSIZE;
+    HBITMAP hBitmap = 0;
+    hBitmap = (HBITMAP)LoadImage(GetModuleHandle(0),
+                                 pszResourceName,
+                                 IMAGE_BITMAP,
+                                 0,
+                                 0,
+                                 type);
+    if (hBitmap)
+    {
+        BITMAP bm;
+        GetObject(hBitmap, sizeof(BITMAP), &bm);
 
-    DrawBitmap(hdc, hBitmap, rc.left, rc.top);
-    DeleteObject(hBitmap);
-  }
+        DrawBitmap(hdc, hBitmap, rc.left, rc.top);
+        DeleteObject(hBitmap);
+    }
 }
 
 void FillSolidRect(HDC hDC, LPCRECT lpRect, COLORREF clr)
 {
-  COLORREF clrOld = SetBkColor(hDC, clr);
+    COLORREF clrOld = SetBkColor(hDC, clr);
 
-  if (clrOld != CLR_INVALID)
-  {
-    ExtTextOut(hDC, 0, 0, ETO_OPAQUE, lpRect, NULL, 0, NULL);
-    SetBkColor(hDC, clrOld);
-  }
+    if (clrOld != CLR_INVALID)
+    {
+        ExtTextOut(hDC, 0, 0, ETO_OPAQUE, lpRect, NULL, 0, NULL);
+        SetBkColor(hDC, clrOld);
+    }
 }
 
 HWND Create(void* pMain,
@@ -80,52 +82,52 @@ HWND Create(void* pMain,
 
 {
 
-  HINSTANCE hInstance = GetModuleHandle(NULL);
-  WNDCLASSEX wcex;
-  wcex.cbSize = sizeof(WNDCLASSEX);
-  wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-  wcex.lpfnWndProc = proc;
-  wcex.cbClsExtra = 0;
-  wcex.cbWndExtra = 0;
-  wcex.hInstance = hInstance;
-  wcex.hIcon = 0; // LoadIcon(hInstance, MAKEINTRESOURCE(IconId));
-  wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-  wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    WNDCLASSEX wcex;
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+    wcex.lpfnWndProc = proc;
+    wcex.cbClsExtra = 0;
+    wcex.cbWndExtra = 0;
+    wcex.hInstance = hInstance;
+    wcex.hIcon = 0; // LoadIcon(hInstance, MAKEINTRESOURCE(IconId));
+    wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 
-  if (MENUIDD != 0)
-  {
-    wcex.lpszMenuName = MAKEINTRESOURCE(MENUIDD);
-  }
-  else
-  {
-    wcex.lpszMenuName = NULL;
-  }
+    if (MENUIDD != 0)
+    {
+        wcex.lpszMenuName = MAKEINTRESOURCE(MENUIDD);
+    }
+    else
+    {
+        wcex.lpszMenuName = NULL;
+    }
 
-  wcex.lpszClassName = lpWindowClassName;
+    wcex.lpszClassName = lpWindowClassName;
 
-  if (ICON)
-  {
-    wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(ICON));
-  }
-  else
-  {
-    wcex.hIconSm = NULL;
-  }
+    if (ICON)
+    {
+        wcex.hIconSm = LoadIcon(hInstance, MAKEINTRESOURCE(ICON));
+    }
+    else
+    {
+        wcex.hIconSm = NULL;
+    }
 
-  RegisterClassEx(&wcex);
-  HWND hWnd = CreateWindowEx(dwExStyle,
-                             lpWindowClassName,
-                             lpWindowName,
-                             dwStyle,
-                             x,
-                             y,
-                             nWidth,
-                             nHeight,
-                             hWndParent,
-                             0,
-                             GetModuleHandle(NULL),
-                             (void*)pMain);
-  return hWnd;
+    RegisterClassEx(&wcex);
+    HWND hWnd = CreateWindowEx(dwExStyle,
+                               lpWindowClassName,
+                               lpWindowName,
+                               dwStyle,
+                               x,
+                               y,
+                               nWidth,
+                               nHeight,
+                               hWndParent,
+                               0,
+                               GetModuleHandle(NULL),
+                               (void*)pMain);
+    return hWnd;
 }
 
 static BOOL IsDialogEx(const DLGTEMPLATE* pTemplate)
@@ -533,6 +535,78 @@ BOOL CenterWindow(HWND hWnd, HWND hWndCenter)
     return SetWindowPos(hWnd, NULL, xLeft, yTop, -1, -1,
                         SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
+
+// callback function
+INT CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+{
+    if (uMsg == BFFM_INITIALIZED && pData != 0) SendMessage(hwnd, BFFM_SETSELECTION, TRUE, pData);
+    return 0;
+}
+
+
+
+BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH])
+{
+    //startDir pode ser null que eh tratado
+    BROWSEINFO bInfo;
+    bInfo.hwndOwner = hwndOwner;
+    bInfo.pidlRoot = NULL;
+    bInfo.pszDisplayName = szDir; // Address of a buffer to receive the display name of the folder selected by the user
+    bInfo.lpszTitle = lpszTitle;
+    bInfo.ulFlags = BIF_NEWDIALOGSTYLE;
+    bInfo.lpfn = BrowseCallbackProc;
+    bInfo.lParam = startDir;
+    bInfo.iImage = -1;
+
+    LPITEMIDLIST lpItem = SHBrowseForFolder(&bInfo);
+    if (lpItem != NULL)
+    {
+        SHGetPathFromIDList(lpItem, szDir);
+        //......
+        return TRUE;
+    }
+    return FALSE;
+}
+
+int ShowOpenDialog(HWND hwnd,
+                   wchar_t fileOut[MAX_PATH],
+                   const wchar_t* pszInitialDir,
+                   const wchar_t* lpstrFilter)
+{
+    OPENFILENAMEW ofn;
+    WCHAR szFile[MAX_PATH];
+    szFile[0] = L'\0';
+
+    WCHAR szInitialDir[MAX_PATH];
+    szInitialDir[0] = L'\0';
+    if (pszInitialDir != NULL)
+    {
+        wcscpy_s(szInitialDir, MAX_PATH, pszInitialDir);
+    }
+
+
+    ZeroMemory(&ofn, sizeof(ofn));
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hwnd;
+
+    ofn.lpstrFile = szFile;
+    ofn.nMaxFile = sizeof(szFile) / sizeof(szFile[0]);
+    ofn.lpstrFilter = lpstrFilter;
+    ofn.nFilterIndex = 1;
+    ofn.lpstrFileTitle = NULL;
+    ofn.nMaxFileTitle = 0;
+    ofn.lpstrInitialDir = szInitialDir;
+    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_DONTADDTORECENT;
+
+    if (GetOpenFileNameW(&ofn) == TRUE)
+    {
+        fileOut = szFile;
+        return IDOK;
+    }
+
+    return IDCANCEL;
+}
+
 
 int CALLBACK PropertySheetDialogCallback(HWND hwndDlg,
                                          UINT uMsg,
