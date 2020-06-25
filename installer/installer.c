@@ -5,7 +5,8 @@
 #include "installer.h"
 #include "resource.h"
 #include <assert.h>
-#include <Shldisp.h>
+#include "zip.h"
+#include <direct.h>
 
 #define MAX_LOADSTRING 100
 #pragma comment(lib, "Comctl32.lib")
@@ -171,132 +172,14 @@ const char* LoadFileInResource(int name, int type, DWORD* size)
 }
 
 
-HRESULT Unzip2Folder(BSTR lpZipFile, BSTR lpFolder)
-{
-    IShellDispatch* pISD;
-
-    Folder* pZippedFile = 0L;
-    Folder* pDestination = 0L;
-
-    long FilesCount = 0;
-    IDispatch* pItem = 0L;
-    FolderItems* pFilesInside = 0L;
-
-    VARIANT Options, OutFolder, InZipFile, Item;
-    CoInitialize(NULL);
-
-    if (CoCreateInstance(&CLSID_Shell, NULL, CLSCTX_INPROC_SERVER, &IID_IShellDispatch, (void**)&pISD) != S_OK)
-        return E_FAIL;
-
-    InZipFile.vt = VT_BSTR;
-    InZipFile.bstrVal = lpZipFile;
-    pISD->lpVtbl->NameSpace(pISD, InZipFile, &pZippedFile);
-    if (!pZippedFile)
-    {
-        pISD->lpVtbl->Release(pISD);
-        return E_FAIL;
-    }
-
-    OutFolder.vt = VT_BSTR;
-    OutFolder.bstrVal = lpFolder;
-    pISD->lpVtbl->NameSpace(pISD, OutFolder, &pDestination);
-    if (!pDestination)
-    {
-        pZippedFile->lpVtbl->Release(pZippedFile);
-        pISD->lpVtbl->Release(pISD);
-        return E_FAIL;
-    }
-
-    pZippedFile->lpVtbl->Items(pZippedFile, &pFilesInside);
-    if (!pFilesInside)
-    {
-        pDestination->lpVtbl->Release(pDestination);
-        pZippedFile->lpVtbl->Release(pZippedFile);
-        pISD->lpVtbl->Release(pISD);
-        return 1;
-    }
-
-    pFilesInside->lpVtbl->get_Count(pFilesInside, &FilesCount);
-    if (FilesCount < 1)
-    {
-        pFilesInside->lpVtbl->Release(pFilesInside);
-        pDestination->lpVtbl->Release(pDestination);
-        pZippedFile->lpVtbl->Release(pZippedFile);
-        pISD->lpVtbl->Release(pISD);
-        return 0;
-    }
-
-    pFilesInside->lpVtbl->QueryInterface(pFilesInside, &IID_IDispatch, (void**)&pItem);
-
-    Item.vt = VT_DISPATCH;
-    Item.pdispVal = pItem;
-
-    Options.vt = VT_I4;
-    Options.lVal = 1024 | 512 | 16 | 4;//http://msdn.microsoft.com/en-us/library/bb787866(VS.85).aspx
-
-    HRESULT retval = pDestination->lpVtbl->CopyHere(pDestination, Item, Options) == S_OK;
-
-    pItem->lpVtbl->Release(pItem); pItem = 0L;
-    pFilesInside->lpVtbl->Release(pFilesInside); pFilesInside = 0L;
-    pDestination->lpVtbl->Release(pDestination); pDestination = 0L;
-    pZippedFile->lpVtbl->Release(pZippedFile); pZippedFile = 0L;
-    pISD->lpVtbl->Release(pISD); pISD = 0L;
 
 
-    CoUninitialize();
+int on_extract_entry(const char* filename, void* arg) {
+    static int i = 0;
+    int n = *(int*)arg;
+    printf("Extracted: %s (%d of %d)\n", filename, ++i, n);
 
-    return retval;
-}
-
-void UnZipFile(const char* strSrc, const char* strDest)
-{
-    BSTR source = SysAllocString(L"installer.zip");
-    BSTR dest = SysAllocString(L"folder");
-
-    HRESULT hResult = S_FALSE;
-    IShellDispatch* pIShellDispatch = NULL;
-    Folder* pToFolder = NULL;
-    VARIANT variantDir, variantFile, variantOpt;
-
-    CoInitialize(NULL);
-
-    hResult = CoCreateInstance(&CLSID_Shell, NULL, CLSCTX_INPROC_SERVER,
-                               &IID_IShellDispatch, (void**)&pIShellDispatch);
-    if (SUCCEEDED(hResult))
-    {
-        VariantInit(&variantDir);
-        variantDir.vt = VT_BSTR;
-        variantDir.bstrVal = dest;
-        hResult = pIShellDispatch->lpVtbl->NameSpace(pIShellDispatch, variantDir, &pToFolder);
-
-        if (SUCCEEDED(hResult))
-        {
-            Folder* pFromFolder = NULL;
-            VariantInit(&variantFile);
-            variantFile.vt = VT_BSTR;
-            variantFile.bstrVal = source;
-            hResult = pIShellDispatch->lpVtbl->NameSpace(pIShellDispatch, variantFile, &pFromFolder);
-
-            FolderItems* fi = NULL;
-            pFromFolder->lpVtbl->Items(pFromFolder, &fi);
-
-            VariantInit(&variantOpt);
-            variantOpt.vt = VT_I4;
-            variantOpt.lVal = FOF_NO_UI;
-
-            VARIANT newV;
-            VariantInit(&newV);
-            newV.vt = VT_DISPATCH;
-            newV.pdispVal = fi;
-            hResult = pToFolder->lpVtbl->CopyHere(pToFolder, newV, variantOpt);
-            Sleep(1000);
-            pFromFolder->lpVtbl->Release(pFromFolder);
-            pToFolder->lpVtbl->Release(pToFolder);
-        }
-        pIShellDispatch->lpVtbl->Release(pIShellDispatch);
-    }
-
-    CoUninitialize();
+    return 0;
 }
 
 void SaveFile()
@@ -313,20 +196,28 @@ void SaveFile()
     const char* data = LockResource(rcData);
 
 
-    FILE* out = fopen("c:\\installer.zip", "wb");
+    FILE* out = fopen("c:\\foo.zip", "wb");
     if (out)
     {
         fwrite(data, sizeof(char), size, out);
         fclose(out);
+        //_mkdir("tmp");
+        int arg = 2;
+        zip_extract("c:\\foo.zip", "c:\\tmp", on_extract_entry, &arg);
 
-        Unzip2Folder(L"c:\\installer.zip", L"c:\\folder");
+        //copiar tudo agora para destino.
+
+        //apagar pasta temp
+        
     }
     UnlockResource(rcData);
 
 
 }
 
-
+//dentro do recurso deste programa ja se encontra sempre o mesmo
+//zip com tudo dentro.
+//este zip eh decompactado em uma pasta temporia depois
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                       _In_opt_ HINSTANCE hPrevInstance,
                       _In_ LPWSTR    lpCmdLine,
@@ -379,11 +270,16 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
             return (INT_PTR)TRUE;
 
         case WM_COMMAND:
-            if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+            if (LOWORD(wParam) == IDC_INSTALL)
+            {
+                SaveFile();
+                MessageBoxA(hDlg, "Instalação compluída", "Install", MB_ICONINFORMATION | MB_OK);
+            }
+            else if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
             {
                 EndDialog(hDlg, LOWORD(wParam));
                 PostQuitMessage(0);
-                SaveFile();
+                
                 return (INT_PTR)TRUE;
             }
             break;

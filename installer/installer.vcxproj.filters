@@ -27,6 +27,12 @@
     <ClInclude Include="installer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="miniz.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="zip.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="installer.rc">
@@ -48,5 +54,11 @@
     <ClCompile Include="installer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="zip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="foo.zip" />
   </ItemGroup>
 </Project>
