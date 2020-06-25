@@ -33,6 +33,9 @@
     <ClInclude Include="zip.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="WindowsDesktop.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="installer.rc">
@@ -55,6 +58,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="zip.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowsDesktop.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
