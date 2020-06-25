@@ -534,3 +534,104 @@ BOOL CenterWindow(HWND hWnd, HWND hWndCenter)
                         SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
+int CALLBACK PropertySheetDialogCallback(HWND hwndDlg,
+                                         UINT uMsg,
+                                         LPARAM lParam)
+{
+    switch (uMsg)
+    {
+        case PSCB_BUTTONPRESSED:
+            switch (lParam)
+            {
+                case PSBTN_OK:
+                    break;
+                case PSBTN_CANCEL:
+                    break;
+                case PSBTN_APPLYNOW:
+                    break;
+                case  PSBTN_FINISH:
+                    break;
+            }
+            break;
+
+        case PSCB_INITIALIZED:
+            break;
+
+        case PSCB_PRECREATE:
+        {
+            DLGTEMPLATE* pDlgTemplate = (DLGTEMPLATE*)lParam;
+            struct DialogTemplate dlt;
+            dlt.m_hTemplate = pDlgTemplate;
+
+            wchar_t strFontName[200];
+            int nPointSize;
+            GetSystemIconFont(strFontName, &nPointSize);
+            DialogTemplate_SetFont(&dlt, strFontName, (WORD)nPointSize);
+
+            memmove((void*)lParam, dlt.m_hTemplate, dlt.m_dwTemplateSize);
+        }
+
+        break;
+    }
+    return 0;
+}
+
+
+INT_PTR ShowPropertySheet(HINSTANCE hInstance,
+                          HWND hwndParent,
+                          const wchar_t* pszCaption,
+                          PROPSHEETPAGE** pages,
+                          size_t nPages)
+{
+    PFNPROPSHEETCALLBACK callback = PropertySheetDialogCallback;
+    if (hInstance == NULL)
+    {
+        hInstance = s_hInstance;
+    }
+
+    ASSERT(nPages <= 4); //basta aumentar quando precisar...
+    HPROPSHEETPAGE rhpsp[4];
+    struct DialogTemplate dlt[4];
+
+    for (size_t i = 0; i < nPages; i++)
+    {
+        DialogTemplate_Load(&dlt[i], hInstance, pages[i]->pszTemplate);
+
+        wchar_t strFontName[200];
+        int nPointSize;
+        GetSystemIconFont(strFontName, &nPointSize);
+        DialogTemplate_SetFont(&dlt, strFontName, (WORD)nPointSize);
+        LPSTR pdata = (LPSTR)GlobalLock(dlt[i].m_hTemplate);
+
+        if (pdata == 0)
+        {
+            ASSERT(0);
+            return 0;
+        }
+        pages[i]->pResource = (LPCDLGTEMPLATE)(dlt[i].m_hTemplate);
+        rhpsp[i] = CreatePropertySheetPage(pages[i]);
+    }
+
+    PROPSHEETHEADER psh;
+    ZeroMemory(&psh, sizeof(psh));
+    psh.dwSize = sizeof(psh);
+    psh.hInstance = hInstance;
+    psh.hwndParent = hwndParent;
+    psh.phpage = rhpsp;
+    psh.dwFlags = PSH_USEICONID | PSH_USECALLBACK | PSH_NOAPPLYNOW | PSH_NOCONTEXTHELP;
+    psh.pszCaption = pszCaption;
+    psh.pszIcon = IDI_APPLICATION;
+    psh.nStartPage = 0;
+    psh.nPages = (UINT)nPages;
+    psh.pfnCallback = callback;
+    psh.hbmWatermark = 0;// (HBITMAP)(T*)(this);
+    INT_PTR r = PropertySheet(&psh);
+
+    for (size_t i = 0; i < nPages; i++)
+    {
+        GlobalUnlock(dlt[i].m_hTemplate);
+    }
+
+    return r;
+}
+

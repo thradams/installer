@@ -95,7 +95,7 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
 
 #define END_DLG_PROC\
   }\
-  return DefWindowProc(hWnd, message, wParam, lParam);\
+  return (INT_PTR)FALSE;\
 }
 
 
@@ -244,3 +244,8 @@ struct DLGITEMTEMPLATEEX
       JOIN(N, _OnCommand)(pThis, LOWORD(wParam), HIWORD(wParam), (HWND)lParam); \
  break;
 
+INT_PTR ShowPropertySheet(HINSTANCE hInstance,
+                          HWND hwndParent,
+                          const wchar_t* pszCaption,
+                          PROPSHEETPAGE** pages,
+                          size_t nPages);

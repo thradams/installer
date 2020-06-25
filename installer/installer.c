@@ -93,7 +93,7 @@ struct AboutDlg
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 {
-    if (cmd == IDOK)
+    if (cmd == IDCANCEL)
     {
         EndDialog(p->m_hDlg, 1);
         PostQuitMessage(0);
@@ -108,6 +108,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 BEGIN_DLG_PROC(AboutDlg)
 ON_COMMAND(AboutDlg)
 END_DLG_PROC
+
 
 
 //dentro do recurso deste programa ja se encontra sempre o mesmo
