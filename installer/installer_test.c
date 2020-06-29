@@ -255,6 +255,146 @@ ON_COMMAND(AboutDlg)
 END_DLG_PROC
 
 
+LONG Open(_In_ HKEY hKeyParent,
+          _In_opt_z_ LPCTSTR lpszKeyName,
+          _In_ REGSAM samDesired/* = KEY_READ | KEY_WRITE*/)
+{
+    assert(hKeyParent != NULL);
+    HKEY hKey = NULL;
+    LONG lRes = RegOpenKeyEx(hKeyParent, lpszKeyName, 0, samDesired, &hKey);
+
+    if (lRes == ERROR_SUCCESS)
+    {
+        //lRes = Close();
+        assert(lRes == ERROR_SUCCESS);
+       // m_hKey = hKey;
+    }
+
+    return lRes;
+}
+
+inline LONG RegKey_QueryStringValue(HKEY hKey,
+                                    LPCTSTR pszValueName,
+                                    LPTSTR pszValue,
+                                    ULONG* pnChars) 
+{
+    LONG lRes;
+    DWORD dwType;
+    ULONG nBytes;
+
+    assert(hKey != NULL);
+    assert(pnChars != NULL);
+
+    nBytes = (*pnChars) * sizeof(TCHAR);
+    *pnChars = 0;
+    lRes = RegQueryValueEx(hKey, pszValueName, NULL, &dwType, (LPBYTE)(pszValue),
+                             &nBytes);
+
+    if (lRes != ERROR_SUCCESS)
+    {
+        return lRes;
+    }
+
+    if (dwType != REG_SZ && dwType != REG_EXPAND_SZ)
+    {
+        return ERROR_INVALID_DATA;
+    }
+
+    if (pszValue != NULL)
+    {
+        if (nBytes != 0)
+        {
+
+            if ((nBytes % sizeof(TCHAR) != 0) || (pszValue[nBytes / sizeof(TCHAR) - 1] != 0))
+            {
+                return ERROR_INVALID_DATA;
+            }
+
+        }
+        else
+        {
+            pszValue[0] = L'\0';
+        }
+    }
+
+    *pnChars = nBytes / sizeof(TCHAR);
+
+    return ERROR_SUCCESS;
+}
+
+
+LONG RegKey_QueryDWORDValue(HKEY hKey, LPCTSTR pszValueName, DWORD* dwValue)
+{
+    LONG lRes;
+    ULONG nBytes;
+    DWORD dwType;
+
+    assert(hKey != NULL);
+
+    nBytes = sizeof(DWORD);
+    lRes = RegQueryValueEx(hKey, pszValueName, NULL, &dwType, (LPBYTE)(&dwValue),
+                             &nBytes);
+
+    if (lRes != ERROR_SUCCESS)
+        return lRes;
+
+    if (dwType != REG_DWORD)
+        return ERROR_INVALID_DATA;
+
+    return ERROR_SUCCESS;
+}
+
+ LONG RegKey_SetStringValue(
+    HKEY hKey,
+    LPCTSTR pszValueName,
+    LPCTSTR pszValue,
+    DWORD dwType) 
+{
+    assert(hKey != NULL);
+    assert((dwType == REG_SZ) || (dwType == REG_EXPAND_SZ));
+
+    if (pszValue == NULL)
+    {
+        return ERROR_INVALID_DATA;
+    }
+
+    return RegSetValueEx(hKey,
+                           pszValueName,
+                           0,
+                           dwType,
+                           (const BYTE*)(pszValue),
+                           ((DWORD)(wcslen(pszValue)) + 1) * sizeof(TCHAR));
+}
+
+ void AddSystemVariable()
+ {
+     //ver classe class CRegKey da ATL
+     //exemplo de como adicionar uma sistem variable no path
+     //HKEY_CURRENT_USER\Software\Elipse Software\E3\Studio\RecentDomains
+#define PATH_REGISTRY_RECENT L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"
+
+
+     HKEY hKey = NULL;
+     LONG lRes = RegOpenKeyExW(HKEY_LOCAL_MACHINE, PATH_REGISTRY_RECENT, 0, KEY_READ | KEY_WRITE, &hKey);
+
+     if (lRes == ERROR_SUCCESS)
+     {
+         //lRes = Close();
+         assert(lRes == ERROR_SUCCESS);
+         wchar_t buffer[2000];
+         ULONG chars = 2000;
+         RegKey_QueryStringValue(hKey,
+                                 L"Path",
+                                 buffer,
+                                 &chars);
+         wcscat(buffer, L";C:\\Program Files(x86)\\Elipse Software\\Elipse CloudLink");
+         RegKey_SetStringValue(hKey, L"Path", buffer, REG_SZ);
+
+         lRes = RegCloseKey(hKey);
+
+     }
+ }
+
 //dentro do recurso deste programa ja se encontra sempre o mesmo
 //zip com tudo dentro.
 //este zip eh decompactado em uma pasta temporia depois
@@ -268,6 +408,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     s_hInstance = hInstance;
+  
+
 
     struct AboutDlg dlg;
 
