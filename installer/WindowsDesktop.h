@@ -12,7 +12,7 @@ void FillSolidRect(HDC hDC, LPCRECT lpRect, COLORREF clr);
 
 BOOL CenterWindow(HWND hWnd, HWND hWndCenter);
 
-INT_PTR ShowDialog(PCWSTR pszDialogResourceName,
+INT_PTR ShowDialog(UINT idd,
                    void* p,
                    HWND hParent,
                    DLGPROC lpDialogFunc);
@@ -83,7 +83,7 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
   }\
   else\
   {\
-    pThis = (struct MainWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);\
+    pThis = (struct DIALOGNAME*)GetWindowLongPtr(hWnd, GWLP_USERDATA);\
   }\
  if (!pThis)\
  {\
