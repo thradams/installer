@@ -45,8 +45,8 @@ void SaveFile()
 
 }
 
-#if 0
-#include "stdafx.h"
+
+//#include "stdafx.h"
 #include "windows.h"
 #include "winnls.h"
 #include "shobjidl.h"
@@ -54,25 +54,25 @@ void SaveFile()
 #include "objidl.h"
 #include "shlguid.h"
 
-HRESULT CreateLink(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc)
+HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc)
 {
     HRESULT hres;
     IShellLink* psl;
 
     // Get a pointer to the IShellLink interface. It is assumed that CoInitialize
     // has already been called.
-    hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+    hres = CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLink, (LPVOID*)&psl);
     if (SUCCEEDED(hres))
     {
         IPersistFile* ppf;
 
         // Set the path to the shortcut target and add the description. 
-        psl->SetPath(lpszPathObj);
-        psl->SetDescription(lpszDesc);
+        psl->lpVtbl->SetPath(psl, lpszPathObj);
+        psl->lpVtbl->SetDescription(psl, lpszDesc);
 
         // Query IShellLink for the IPersistFile interface, used for saving the 
         // shortcut in persistent storage. 
-        hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
+        hres = psl->lpVtbl->QueryInterface(psl, &IID_IPersistFile, (LPVOID*)&ppf);
 
         if (SUCCEEDED(hres))
         {
@@ -82,14 +82,15 @@ HRESULT CreateLink(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc)
             MultiByteToWideChar(CP_ACP, 0, lpszPathLink, -1, wsz, MAX_PATH);
 
             // Save the link by calling IPersistFile::Save. 
-            hres = ppf->Save(wsz, TRUE);
-            ppf->Release();
+            hres = ppf->lpVtbl->Save(ppf,wsz, TRUE);
+            ppf->lpVtbl->Release(ppf);
         }
-        psl->Release();
+        psl->lpVtbl->Release(psl);
     }
     return hres;
 }
-#endif
+
+
 void rmtree(const char path[])
 {
 #if 0
@@ -155,6 +156,7 @@ void rmtree(const char path[])
     closedir(dir);
 #endif
 }
+
 
 int mkdir_p(const char* path)
 {
@@ -305,8 +307,56 @@ LONG RegKey_SetStringValue(
                          ((DWORD)(wcslen(pszValue)) + 1) * sizeof(TCHAR));
 }
 
+BOOL DeleteRegValue(HKEY hKeyParent,
+                    LPCTSTR pszSubkey,
+                    LPCTSTR pszValueName)
+{
+    BOOL bResult = FALSE;
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+
+    if (hKey)
+    {
+        LSTATUS e = RegDeleteKeyValue(hKey, pszSubkey, pszValueName);
+        RegCloseKey(hKey);
+    }
+    return bResult;
+}
+
+
+BOOL DeleteRegKey(HKEY hKeyParent,
+                  LPCTSTR pszSubkey)
+{
+    BOOL bResult = FALSE;
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+
+    if (hKey)
+    {
+        LSTATUS e = RegDeleteKey(hKey, pszSubkey);
+        RegCloseKey(hKey);
+    }
+    return bResult;
+}
+
+
+BOOL WriteRegStr(HKEY hKeyParent, 
+                 LPCTSTR pszSubkey,
+                 LPCTSTR pszKeyName,
+                 LPCTSTR pszValue)
+{
+    BOOL bResult = FALSE;
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+
+    if (hKey)
+    {
+        RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
+        RegCloseKey(hKey);
+    }
+    return bResult;
+}
+
 void AddSystemVariable()
 {
+    //https://nsis.sourceforge.io/Docs/Chapter4.html
     //root_key subkey key_name value
     //WriteRegStr HKLM "Software\My Company\My Software" "String Value" "dead beef"
     //
