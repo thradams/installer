@@ -1,14 +1,14 @@
 // installer.cpp : Defines the entry point for the application.
 //
-#include <Windows.h>
+//#include <Windows.h>
+//
+//#include "installer.h"
+//#include "resource.h"
+//#include <assert.h>
+//#include "zip.h"
 
-#include "installer.h"
 #include "resource.h"
-#include <assert.h>
-#include "zip.h"
-
-
-#include "installer.h"
+#include "installer_.h"
 
 #define MAX_LOADSTRING 100
 
@@ -40,7 +40,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
     else if (cmd == IDC_INSTALL)
     {
-        SaveFile();
+        SaveFile(IDR_TXT1);
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {
@@ -76,7 +76,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     s_hInstance = hInstance;
-  
+
     struct AboutDlg dlg;
 
     INT_PTR r = ShowDialog(IDD_INSTALLER_DIALOG,

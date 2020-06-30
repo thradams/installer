@@ -1,10 +1,28 @@
-#pragma once
 
-# //BEGIN_EXPORT
+
+
+
+
+
+#include <direct.h>
+
 
 #include <Windows.h>
+
+
+#include <Shlobj.h>
+
+
+
+
+
+
 #include <stdbool.h>
+
+
 #include <assert.h>
+
+
 #include <commctrl.h>
 
 #define ASSERT assert
@@ -252,5 +270,21 @@ struct DLGITEMTEMPLATEEX
 
 BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);
 
-# //END_EXPORT
+
+
+
+void SaveFile(DWORD idd);
+
+HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
+int mkdir_p(const char* path);
+
+BOOL DeleteRegValue(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszValueName);
+
+BOOL DeleteRegKey(HKEY hKeyParent, LPCTSTR pszSubkey);
+
+BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR pszValue);
+
+BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
+
+
 

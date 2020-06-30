@@ -1,6 +1,9 @@
 #include  "installer.h"
 #include <stdio.h>
+#include <string.h>
+#include <wchar.h>
 #include "zip.h"
+
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
     int n = *(int*)arg;
@@ -9,11 +12,11 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void SaveFile()
+void SaveFile(DWORD idd)
 {
 
     HMODULE handle = GetModuleHandle(NULL);
-    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(IDR_TXT1),
+    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(idd),
                             MAKEINTRESOURCE(256));
     HGLOBAL rcData = LoadResource(handle, rc);
 
