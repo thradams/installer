@@ -1,6 +1,5 @@
 #pragma once
 
-# //BEGIN_EXPORT
 
 
 #include <direct.h>
@@ -8,10 +7,10 @@
 #include <Shlobj.h>
 #include "WindowsDesktop.h"
 
-void SaveFile(DWORD idd);
+
 
 HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
-int mkdir_p(const char* path);
+int _wmkdir_p(const wchar_t* path);
 
 BOOL DeleteRegValue(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszValueName);
 
@@ -23,4 +22,3 @@ BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR p
 
 
 BOOL Start(HINSTANCE hInstance);
-# //END_EXPORT

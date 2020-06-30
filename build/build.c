@@ -14,8 +14,6 @@
 
 int main()
 {
-
-
     //vai para diretorio do installer
     chdir("../installer/");
 
@@ -28,13 +26,4 @@ int main()
 
     amalgamate("installer_.c", /*bHeaderMode*/false, files, (sizeof(files) / sizeof(files[0])));
 
-
-
-    //monta header publico selecionando alguns headers para incluir
-    const char* headers[] = {
-        "installer.h"
-    };
-
-
-    amalgamate("installer_.h",  /*bHeaderMode*/true, headers, (sizeof(headers) / sizeof(headers[0])));
-}
+ }

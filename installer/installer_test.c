@@ -1,25 +1,10 @@
 
-/*
-  programa de exemplo de como criar um instalador
-*/
-#include "installer_.h"
+//vou colocar os eventos arqui
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                      _In_opt_ HINSTANCE hPrevInstance,
-                      _In_ LPWSTR    lpCmdLine,
-                      _In_ int       nCmdShow)
+void OnFilesExtracted()
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-    
-    Start(hInstance);
-    
-    MSG msg;    
-    while (GetMessage(&msg, NULL, 0, 0))
-    {
-        DispatchMessage(&msg);
-    }
+    //esta funcao eh chamada apos a copia dos arquivos para destino.
 
-    return (int)msg.wParam;
+    //agora podemos gerar atalhos
+    //rodar outros instaldores etc.
 }
-

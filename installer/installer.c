@@ -1,9 +1,12 @@
+#include "config.h"
 #include  "installer.h"
 #include <stdio.h>
 #include <string.h>
 #include <wchar.h>
 #include "zip.h"
 #include "resource.h"
+
+int mkdir_p(const char* path);
 
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
@@ -13,8 +16,10 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void SaveFile(DWORD idd)
+void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
 {
+    char destination[MAX_PATH];
+    size_t r = wcstombs(destination, pDestination, MAX_PATH);
 
     HMODULE handle = GetModuleHandle(NULL);
     HRSRC rc = FindResource(handle, MAKEINTRESOURCE(idd),
@@ -24,25 +29,30 @@ void SaveFile(DWORD idd)
     DWORD size = SizeofResource(handle, rc);
 
     const char* data = LockResource(rcData);
+       
 
+    char zipPath[MAX_PATH] = { 0 };
+    strcat(zipPath, destination);
+    strcat(zipPath, "\\zip.zip");
 
-    mkdir_p("C:\\Program Files (x86)\\thiagotest\\programa1");
+    mkdir_p(destination);
 
-    FILE* out = fopen("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip", "wb");
+    FILE* out = fopen(zipPath, "wb");
     if (out)
     {
         fwrite(data, sizeof(char), size, out);
         fclose(out);
         //_mkdir("tmp");
+
         int arg = 2;
-        zip_extract("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip", "C:\\Program Files (x86)\\thiagotest\\programa1\\", on_extract_entry, &arg);
+        zip_extract(zipPath, destination, on_extract_entry, &arg);
 
-        DeleteFileA("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip");
-        //CopyFile()
-        //copiar tudo agora para destino.
+        DeleteFileA(zipPath);
+        //OK TODOS ARQUIVOS EXTRAIDEOS
 
-        //apagar pasta temp
+        extern void OnFilesExtracted();
 
+        OnFilesExtracted();
     }
     UnlockResource(rcData);
 
@@ -161,7 +171,6 @@ void rmtree(const char path[])
 #endif
 }
 
-
 int mkdir_p(const char* path)
 {
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
@@ -176,7 +185,7 @@ int mkdir_p(const char* path)
         errno = ENAMETOOLONG;
         return -1;
     }
-    strcpy(_path, path);
+    lstrcpyA(_path, path);
 
     /* Iterate the string */
     for (p = _path + 1; *p; p++) {
@@ -200,6 +209,7 @@ int mkdir_p(const char* path)
 
     return 0;
 }
+
 
 
 HKEY  OpenRegKey(HKEY hKeyParent,
@@ -427,6 +437,16 @@ struct AboutDlg
 void AboutDlg_OnInit(struct AboutDlg* p)
 {
     Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
+    TCHAR pf[MAX_PATH];
+    SHGetSpecialFolderPath(
+        0,
+        pf,
+        CSIDL_PROGRAM_FILESX86,
+        FALSE);
+    
+    wcscat(pf, L"\\" PRODUCT_PUBLISHER L"\\" PRODUCT_NAME);
+
+    SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
 }
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
@@ -438,7 +458,10 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
     else if (cmd == IDC_INSTALL)
     {
-        SaveFile(IDR_TXT1);
+        wchar_t destination[MAX_PATH];
+        GetDlgItemText(p->m_hDlg, IDC_DESTINATION, destination, MAX_PATH);
+
+        ExtractAllFilesToDestination(IDR_TXT1, destination);
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {
@@ -472,3 +495,25 @@ BOOL Start(HINSTANCE hInstance)
                            AboutDlg_ProcEx);
     return r;
 }
+
+
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+                      _In_opt_ HINSTANCE hPrevInstance,
+                      _In_ LPWSTR    lpCmdLine,
+                      _In_ int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    Start(hInstance);
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        DispatchMessage(&msg);
+    }
+
+    return (int)msg.wParam;
+}
+
+

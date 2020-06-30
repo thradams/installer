@@ -9156,13 +9156,20 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
 
 
 
+
+#define PRODUCT_NAME L"ProductName"
+#define PRODUCT_VERSION   L"1.2.3"
+#define PRODUCT_PUBLISHER L"Thradams"
+
+
+
+
 //#pragma once
 
 
 
 
-
-void SaveFile(DWORD idd);
+void ExtractAllFilesToDestination(DWORD idd);
 
 HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
 int mkdir_p(const char* path);
@@ -9177,7 +9184,6 @@ BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR p
 
 
 BOOL Start(HINSTANCE hInstance);
-
 
 
 
@@ -9203,6 +9209,7 @@ BOOL Start(HINSTANCE hInstance);
 #define IDC_INSTALL                     1000
 #define IDC_PROGRESS1                   1001
 #define IDC_EDIT1                       1003
+#define IDC_DESTINATION                 1003
 #define IDC_FOLDER                      1004
 #define IDC_SYSLINK1                    1005
 #define IDC_CHECK1                      1006
@@ -9229,7 +9236,7 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void SaveFile(DWORD idd)
+void ExtractAllFilesToDestination(DWORD idd)
 {
 
     HMODULE handle = GetModuleHandle(NULL);
@@ -9652,6 +9659,16 @@ struct AboutDlg
 void AboutDlg_OnInit(struct AboutDlg* p)
 {
     Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
+    TCHAR pf[MAX_PATH];
+    SHGetSpecialFolderPath(
+        0,
+        pf,
+        CSIDL_PROGRAM_FILESX86,
+        FALSE);
+    
+    wcscat(pf, L"\\" PRODUCT_NAME);
+
+    SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
 }
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
@@ -9663,7 +9680,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
     else if (cmd == IDC_INSTALL)
     {
-        SaveFile(IDR_TXT1);
+        ExtractAllFilesToDestination(IDR_TXT1);
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {
@@ -9697,5 +9714,27 @@ BOOL Start(HINSTANCE hInstance)
                            AboutDlg_ProcEx);
     return r;
 }
+
+
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+                      _In_opt_ HINSTANCE hPrevInstance,
+                      _In_ LPWSTR    lpCmdLine,
+                      _In_ int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    Start(hInstance);
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        DispatchMessage(&msg);
+    }
+
+    return (int)msg.wParam;
+}
+
+
 
 #undef PATH_REGISTRY_RECENT 
