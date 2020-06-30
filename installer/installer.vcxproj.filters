@@ -24,16 +24,10 @@
     <ClInclude Include="WindowsDesktop.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="framework.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="installer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

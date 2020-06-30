@@ -354,6 +354,29 @@ BOOL WriteRegStr(HKEY hKeyParent,
     return bResult;
 }
 
+BOOL ReadRegStr(HKEY hKeyParent,
+                LPCTSTR pszSubkey,
+                LPCTSTR pszKeyName,
+                LPTSTR pszValue,
+                ULONG* pnChars)
+{
+    BOOL bResult = false;
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+
+
+    if (hKey)
+    {
+        RegKey_QueryStringValue(hKey,
+                                pszKeyName,
+                                pszValue,
+                                pnChars);
+        RegCloseKey(hKey);
+    }
+    return bResult;
+}
+
+//ReadRegStr $R1 ${ PRODUCT_UNINST_ROOT_KEY } "Software\Microsoft\Windows\CurrentVersion\Uninstall\MobileServer" "UninstallString"
+
 void AddSystemVariable()
 {
     //https://nsis.sourceforge.io/Docs/Chapter4.html

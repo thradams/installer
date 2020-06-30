@@ -1,7 +1,7 @@
 // installer.cpp : Defines the entry point for the application.
 //
 #include <Windows.h>
-#include "framework.h"
+
 #include "installer.h"
 #include "resource.h"
 #include <assert.h>
@@ -77,8 +77,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     s_hInstance = hInstance;
   
-
-
     struct AboutDlg dlg;
 
     INT_PTR r = ShowDialog(IDD_INSTALLER_DIALOG,
