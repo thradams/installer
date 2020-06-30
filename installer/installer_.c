@@ -8438,8 +8438,6 @@ BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir,
 
 
 
-
-
 #include <shlobj_core.h>
 
 
@@ -9178,10 +9176,50 @@ BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR
 BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
 
 
+BOOL Start(HINSTANCE hInstance);
+
 
 
 
 #include <wchar.h>
+
+
+//{{NO_DEPENDENCIES}}
+// Microsoft Visual C++ generated include file.
+// Used by installer.rc
+//
+#define IDC_MYICON                      2
+#define IDD_INSTALLER_DIALOG            102
+#define IDS_APP_TITLE                   103
+#define IDD_ABOUTBOX                    103
+#define IDM_ABOUT                       104
+#define IDM_EXIT                        105
+#define IDI_INSTALLER                   107
+#define IDI_SMALL                       108
+#define IDC_INSTALLER                   109
+#define IDR_MAINFRAME                   128
+#define IDR_ZIP1                        129
+#define IDR_TXT1                        130
+#define IDC_INSTALL                     1000
+#define IDC_PROGRESS1                   1001
+#define IDC_EDIT1                       1003
+#define IDC_FOLDER                      1004
+#define IDC_SYSLINK1                    1005
+#define IDC_CHECK1                      1006
+#define IDC_STATIC                      -1
+
+// Next default values for new objects
+// 
+#ifdef APSTUDIO_INVOKED
+#ifndef APSTUDIO_READONLY_SYMBOLS
+#define _APS_NO_MFC                     1
+#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_COMMAND_VALUE         32771
+#define _APS_NEXT_CONTROL_VALUE         1007
+#define _APS_NEXT_SYMED_VALUE           110
+#endif
+#endif
+
 
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
@@ -9600,5 +9638,64 @@ void AddSystemVariable()
     }
 }
 
+
+
+
+
+
+struct AboutDlg
+{
+    HWND m_hDlg;
+    HWND m_hParent;
+};
+
+void AboutDlg_OnInit(struct AboutDlg* p)
+{
+    Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
+}
+
+void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
+{
+    if (cmd == IDCANCEL)
+    {
+        EndDialog(p->m_hDlg, 1);
+        PostQuitMessage(0);
+    }
+    else if (cmd == IDC_INSTALL)
+    {
+        SaveFile(IDR_TXT1);
+        MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
+    }
+    else if (cmd == IDC_FOLDER) {
+
+        wchar_t fileOut[MAX_PATH];
+
+        TCHAR pf[MAX_PATH];
+        SHGetSpecialFolderPath(
+            0,
+            pf,
+            CSIDL_PROGRAM_FILESX86,
+            FALSE);
+
+        BOOL b = ShowSelectFolderDialog(p->m_hDlg, L"Select folder", pf, fileOut);
+    }
+}
+
+BEGIN_DLG_PROC(AboutDlg)
+ON_COMMAND(AboutDlg)
+END_DLG_PROC
+
+
+BOOL Start(HINSTANCE hInstance)
+{
+    s_hInstance = hInstance;
+    struct AboutDlg dlg;
+
+    INT_PTR r = ShowDialog(IDD_INSTALLER_DIALOG,
+                           &dlg,
+                           NULL,
+                           AboutDlg_ProcEx);
+    return r;
+}
 
 #undef PATH_REGISTRY_RECENT 

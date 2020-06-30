@@ -4,7 +4,9 @@
 
 #include "uninstall.h"
 
-
+/*
+ este programa representa o desintalador que fica junto da instalacao
+*/
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,

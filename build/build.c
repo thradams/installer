@@ -7,7 +7,10 @@
 
 #include "build.h"
 
-
+//
+// Este projeto gera a versao almagamate do installer
+//
+//
 
 int main()
 {

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <wchar.h>
 #include "zip.h"
+#include "resource.h"
 
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
@@ -412,3 +413,62 @@ void AddSystemVariable()
     }
 }
 
+
+
+
+
+
+struct AboutDlg
+{
+    HWND m_hDlg;
+    HWND m_hParent;
+};
+
+void AboutDlg_OnInit(struct AboutDlg* p)
+{
+    Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
+}
+
+void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
+{
+    if (cmd == IDCANCEL)
+    {
+        EndDialog(p->m_hDlg, 1);
+        PostQuitMessage(0);
+    }
+    else if (cmd == IDC_INSTALL)
+    {
+        SaveFile(IDR_TXT1);
+        MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
+    }
+    else if (cmd == IDC_FOLDER) {
+
+        wchar_t fileOut[MAX_PATH];
+
+        TCHAR pf[MAX_PATH];
+        SHGetSpecialFolderPath(
+            0,
+            pf,
+            CSIDL_PROGRAM_FILESX86,
+            FALSE);
+
+        BOOL b = ShowSelectFolderDialog(p->m_hDlg, L"Select folder", pf, fileOut);
+    }
+}
+
+BEGIN_DLG_PROC(AboutDlg)
+ON_COMMAND(AboutDlg)
+END_DLG_PROC
+
+
+BOOL Start(HINSTANCE hInstance)
+{
+    s_hInstance = hInstance;
+    struct AboutDlg dlg;
+
+    INT_PTR r = ShowDialog(IDD_INSTALLER_DIALOG,
+                           &dlg,
+                           NULL,
+                           AboutDlg_ProcEx);
+    return r;
+}

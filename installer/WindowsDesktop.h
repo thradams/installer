@@ -1,6 +1,6 @@
 #pragma once
 
-# //BEGIN_EXPORT
+
 
 #include <Windows.h>
 #include <stdbool.h>
@@ -251,6 +251,4 @@ struct DLGITEMTEMPLATEEX
  break;
 
 BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);
-
-# //END_EXPORT
 

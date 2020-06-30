@@ -21,4 +21,6 @@ BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR
 
 BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
 
+
+BOOL Start(HINSTANCE hInstance);
 # //END_EXPORT

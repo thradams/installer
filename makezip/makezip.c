@@ -1,6 +1,9 @@
 
 #include "zip.h"
 
+/*
+ Este projeto monta o foo.zip que eh o arquivo se sera descmpactado na pasta destino
+*/
 int main()
 {
     //este programa monta um foo.zip no diretorio do installer
