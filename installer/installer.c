@@ -363,11 +363,11 @@ BOOL WriteRegStr(HKEY hKeyParent,
     //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     //                              Software\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     BOOL bResult = FALSE;
-    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ /*| KEY_WRITE*/);
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_ALL_ACCESS  /*| KEY_WRITE*/);
 
     if (hKey)
     {
-        //RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
+        RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
         RegCloseKey(hKey);
     }
     return bResult;

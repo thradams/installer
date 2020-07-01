@@ -676,7 +676,7 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
         wchar_t strFontName[200];
         int nPointSize;
         GetSystemIconFont(strFontName, &nPointSize);
-        DialogTemplate_SetFont(&dlt, strFontName, (WORD)nPointSize);
+        DialogTemplate_SetFont(&dlt[i], strFontName, (WORD)nPointSize);
         LPSTR pdata = (LPSTR)GlobalLock(dlt[i].m_hTemplate);
 
         if (pdata == 0)

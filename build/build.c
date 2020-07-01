@@ -21,6 +21,7 @@ int main()
     const char* files[] = {
         "zip.c",
         "WindowsDesktop.c",
+        "Process.c",
         "Installer.c"
     };
 

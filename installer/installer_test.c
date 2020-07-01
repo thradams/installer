@@ -13,6 +13,7 @@ void WriteRegCommon()
     wcscat(uninst, INSTDIR);
     wcscat(uninst, L"\\uninst.exe");
     //criar GUID?
+    
     //https://docs.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"DisplayName", PRODUCT_NAME);
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"UninstallString", uninst);

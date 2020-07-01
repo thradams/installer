@@ -9117,7 +9117,7 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
         wchar_t strFontName[200];
         int nPointSize;
         GetSystemIconFont(strFontName, &nPointSize);
-        DialogTemplate_SetFont(&dlt, strFontName, (WORD)nPointSize);
+        DialogTemplate_SetFont(&dlt[i], strFontName, (WORD)nPointSize);
         LPSTR pdata = (LPSTR)GlobalLock(dlt[i].m_hTemplate);
 
         if (pdata == 0)
@@ -9157,9 +9157,409 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
 
 
 
-#define PRODUCT_NAME L"ProductName"
+//#pragma once
+
+
+
+#include <tlhelp32.h>
+
+
+//
+// Some definitions from NTDDK and other sources
+//
+
+typedef LONG    NTSTATUS;
+typedef LONG    KPRIORITY;
+
+#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+
+#define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
+
+#define SystemProcessesAndThreadsInformation    5
+
+typedef struct _CLIENT_ID {
+    DWORD        UniqueProcess;
+    DWORD        UniqueThread;
+} CLIENT_ID;
+
+typedef struct _UNICODE_STRING {
+    USHORT        Length;
+    USHORT        MaximumLength;
+    PWSTR        Buffer;
+} UNICODE_STRING;
+
+typedef struct _VM_COUNTERS {
+    SIZE_T        PeakVirtualSize;
+    SIZE_T        VirtualSize;
+    ULONG        PageFaultCount;
+    SIZE_T        PeakWorkingSetSize;
+    SIZE_T        WorkingSetSize;
+    SIZE_T        QuotaPeakPagedPoolUsage;
+    SIZE_T        QuotaPagedPoolUsage;
+    SIZE_T        QuotaPeakNonPagedPoolUsage;
+    SIZE_T        QuotaNonPagedPoolUsage;
+    SIZE_T        PagefileUsage;
+    SIZE_T        PeakPagefileUsage;
+} VM_COUNTERS;
+
+typedef struct _SYSTEM_THREADS {
+    LARGE_INTEGER   KernelTime;
+    LARGE_INTEGER   UserTime;
+    LARGE_INTEGER   CreateTime;
+    ULONG            WaitTime;
+    PVOID            StartAddress;
+    CLIENT_ID        ClientId;
+    KPRIORITY        Priority;
+    KPRIORITY        BasePriority;
+    ULONG            ContextSwitchCount;
+    LONG            State;
+    LONG            WaitReason;
+} SYSTEM_THREADS, * PSYSTEM_THREADS;
+
+// Note that the size of the SYSTEM_PROCESSES structure is 
+// different on NT 4 and Win2K, but we don't care about it, 
+// since we don't access neither IoCounters member nor 
+//Threads array
+
+typedef struct _SYSTEM_PROCESSES {
+    ULONG            NextEntryDelta;
+    ULONG            ThreadCount;
+    ULONG            Reserved1[6];
+    LARGE_INTEGER   CreateTime;
+    LARGE_INTEGER   UserTime;
+    LARGE_INTEGER   KernelTime;
+    UNICODE_STRING  ProcessName;
+    KPRIORITY        BasePriority;
+    ULONG            ProcessId;
+    ULONG            InheritedFromProcessId;
+    ULONG            HandleCount;
+    ULONG            Reserved2[2];
+    VM_COUNTERS        VmCounters;
+#if _WIN32_WINNT >= 0x500
+    IO_COUNTERS        IoCounters;
+#endif
+    SYSTEM_THREADS  Threads[1];
+} SYSTEM_PROCESSES, * PSYSTEM_PROCESSES;
+
+
+typedef HANDLE(WINAPI* PFCreateToolhelp32Snapshot)(
+    DWORD dwFlags,
+    DWORD th32ProcessID
+    );
+
+typedef BOOL(WINAPI* PFProcess32First)(
+    HANDLE hSnapshot,
+    LPPROCESSENTRY32 lppe
+    );
+
+typedef BOOL(WINAPI* PFProcess32Next)(
+    HANDLE hSnapshot,
+    LPPROCESSENTRY32 lppe
+    );
+
+// Native NT API Definitions
+typedef NTSTATUS(WINAPI* PFZwQuerySystemInformation)
+(UINT, PVOID, ULONG, PULONG);
+typedef HANDLE(WINAPI* PFGetProcessHeap)(VOID);
+typedef LPVOID(WINAPI* PFHeapAlloc)
+(HANDLE, DWORD, SIZE_T);
+typedef BOOL(WINAPI* PFHeapFree)(HANDLE, DWORD, LPVOID);
+
+struct KillProcess
+{
+    HMODULE            hNTLib;
+    HMODULE            hKernelLib;
+    // ToolHelp related functions
+    PFCreateToolhelp32Snapshot    FCreateToolhelp32Snapshot;
+    PFProcess32First            FProcess32First;
+    PFProcess32Next                FProcess32Next;
+    // native NT api functions
+    PFZwQuerySystemInformation    FQuerySysInfo;
+    PFGetProcessHeap            FGetProcessHeap;
+    PFHeapAlloc                    FHeapAlloc;
+    PFHeapFree                    FHeapFree;
+};
+
+void KillProcess_Init(struct KillProcess* pThis);
+void KillProcess_Destroy(struct KillProcess* pThis);
+
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+                               const WCHAR* pstrProcessName,
+                               DWORD* dwId);
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+                               const WCHAR* pstrProcessName,
+                               DWORD* dwId);
+
+HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName,
+                                 DWORD* dwId);
+
+HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
+
+BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
+
+// Some definitions from NTDDK and other sources
+//
+// callback function for window enumeration
+BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
+{
+    DWORD dwID;
+
+    GetWindowThreadProcessId(hwnd, &dwID);
+
+    if (dwID == (DWORD)lParam)
+    {
+        PostMessage(hwnd, WM_CLOSE, 0, 0);
+    }
+
+    return TRUE;
+}
+
+
+void KillProcess_Init(struct KillProcess* pThis) {
+    pThis->FCreateToolhelp32Snapshot = NULL;
+    pThis->FProcess32First = NULL;
+    pThis->FProcess32Next = NULL;
+    pThis->hKernelLib = NULL;
+    pThis->hNTLib = NULL;
+
+    pThis->hKernelLib = LoadLibraryA("Kernel32");
+    if (pThis->hKernelLib)
+    {
+        // Find ToolHelp functions
+        pThis->FCreateToolhelp32Snapshot =
+            (PFCreateToolhelp32Snapshot)
+            GetProcAddress(pThis->hKernelLib,
+                             "CreateToolhelp32Snapshot");
+        pThis->FProcess32First = (PFProcess32First)
+            GetProcAddress(pThis->hKernelLib,
+                             "Process32FirstW");
+        pThis->FProcess32Next = (PFProcess32Next)
+            GetProcAddress(pThis->hKernelLib,
+                             "Process32NextW");
+    }
+    if (!pThis->FCreateToolhelp32Snapshot ||
+        !pThis->FProcess32First || !pThis->FProcess32Next)
+    { // i.e. we couldn't find the ToolHelp functions, 
+        //so we must be on NT4. Let's load the
+        // undocumented one instead.
+        if (!pThis->hKernelLib)
+            return; // can't do anything at all without 
+        //the kernel.
+
+        pThis->hNTLib = LoadLibraryA("ntdll.dll");
+        if (pThis->hNTLib)
+        {
+            pThis->FQuerySysInfo =
+                (PFZwQuerySystemInformation)
+                GetProcAddress(pThis->hNTLib,
+                                 "ZwQuerySystemInformation");
+            // load some support funcs from the kernel
+            pThis->FGetProcessHeap = (PFGetProcessHeap)
+                GetProcAddress(pThis->hKernelLib,
+                                 "GetProcessHeap");
+            pThis->FHeapAlloc = (PFHeapAlloc)
+                GetProcAddress(pThis->hKernelLib,
+                                 "HeapAlloc");
+            pThis->FHeapFree = (PFHeapFree)
+                GetProcAddress(pThis->hKernelLib,
+                                 "HeapFree");
+        }
+    }
+}
+void KillProcess_Destroy(struct KillProcess* pThis)
+{
+    if (pThis->hKernelLib)
+        FreeLibrary(pThis->hKernelLib);
+    if (pThis->hNTLib)
+        FreeLibrary(pThis->hNTLib);
+}
+BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName)
+{
+    DWORD dwId;
+    HANDLE hProcess = KillProcess_FindProcess(pThis, pstrProcessName, &dwId);
+    BOOL bResult;
+    if (!hProcess)
+        return FALSE;
+
+    // TerminateAppEnum() posts WpThis->CLOSE to all windows whose PID
+    // matches your process's.
+    EnumWindows((WNDENUMPROC)
+                  TerminateAppEnum,
+                  (LPARAM)dwId);
+    // Wait on the handle. If it signals, great. 
+    //If it times out, then you kill it.
+    if (WaitForSingleObject(hProcess, 5000)
+        != WAIT_OBJECT_0)
+        bResult = TerminateProcess(hProcess, 0);
+    else
+        bResult = TRUE;
+    CloseHandle(hProcess);
+    return bResult == TRUE;
+}
+//private:
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis, 
+                               const WCHAR* pstrProcessName,
+                               DWORD* dwId)
+{
+    if (!pThis->hKernelLib)
+        return NULL;
+
+    if (pThis->FCreateToolhelp32Snapshot && pThis->FProcess32First &&
+        pThis->FProcess32Next) // use toolhelpapi
+        return KillProcess_THFindProcess(pThis, pstrProcessName, dwId);
+    if (pThis->FQuerySysInfo && pThis->FHeapAlloc &&
+        pThis->FGetProcessHeap && pThis->FHeapFree) // use NT api
+        return KillProcess_NTFindProcess(pThis, pstrProcessName, dwId);
+    // neither one got loaded. Strange.
+    return NULL;
+}
+
+HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId)
+{
+    HANDLE            hSnapShot = NULL;
+    HANDLE            hResult = NULL;
+    PROCESSENTRY32    processInfo;
+    WCHAR* pstrExeName;
+
+    BOOL bFirst = TRUE;
+    ZeroMemory(&processInfo, sizeof(PROCESSENTRY32));
+    processInfo.dwSize = sizeof(PROCESSENTRY32);
+    hSnapShot = pThis->FCreateToolhelp32Snapshot(
+        TH32CS_SNAPPROCESS, 0);
+    if (hSnapShot == INVALID_HANDLE_VALUE)
+        return NULL;
+
+    // ok now let's iterate with Process32Next until we 
+    // match up the name of our process
+    while ((bFirst ? pThis->FProcess32First(hSnapShot,&processInfo) : pThis->FProcess32Next(hSnapShot, &processInfo)))
+    {
+        bFirst = FALSE;
+        // we need to check for path... and extract 
+        // just the exe name
+        pstrExeName = wcsrchr(processInfo.szExeFile,
+                              '\\');
+        if (!pstrExeName)
+            pstrExeName = processInfo.szExeFile;
+        else
+            pstrExeName++; // skip the \
+            // ok now compare against our process name
+        if (wcsicmp(pstrExeName, pstrProcessName) == 0)
+            // wee weee we found it
+        {
+            // let's get a HANDLE on it
+            hResult = OpenProcess(
+                SYNCHRONIZE | PROCESS_TERMINATE, TRUE,
+                processInfo.th32ProcessID);
+            *dwId = processInfo.th32ProcessID;
+            break;
+        }
+    } // while(Process32Next(hSnapShot, &processInfo){
+    if (hSnapShot)
+        CloseHandle(hSnapShot);
+    return hResult;
+}
+HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrProcessName,
+                                    DWORD* dwId)
+{
+    HANDLE hHeap = pThis->FGetProcessHeap();
+    NTSTATUS Status;
+    ULONG cbBuffer = 0x8000;
+    PVOID pBuffer = NULL;
+    HANDLE hResult = NULL;
+    // it is difficult to say a priory which size of 
+    // the buffer will be enough to retrieve all 
+    // information, so we startwith 32K buffer and 
+    // increase its size until we get the
+    // information successfully
+    do
+    {
+        pBuffer = HeapAlloc(hHeap, 0, cbBuffer);
+        if (pBuffer == NULL)
+            return SetLastError(
+            ERROR_NOT_ENOUGH_MEMORY), NULL;
+
+        Status = pThis->FQuerySysInfo(
+            SystemProcessesAndThreadsInformation,
+            pBuffer, cbBuffer, NULL);
+
+        if (Status == STATUS_INFO_LENGTH_MISMATCH)
+        {
+            HeapFree(hHeap, 0, pBuffer);
+            cbBuffer *= 2;
+        }
+        else if (!NT_SUCCESS(Status))
+        {
+            HeapFree(hHeap, 0, pBuffer);
+            return SetLastError(Status), NULL;
+        }
+    }
+    while (Status == STATUS_INFO_LENGTH_MISMATCH);
+
+    PSYSTEM_PROCESSES pProcesses =
+        (PSYSTEM_PROCESSES)pBuffer;
+
+    for (;;)
+    {
+        PCWSTR pszProcessName =
+            pProcesses->ProcessName.Buffer;
+        if (pszProcessName == NULL)
+            pszProcessName = L"Idle";
+
+        //CHAR szProcessName[MAX_PATH];
+        //WideCharToMultiByte(CP_ACP, 0, pszProcessName,
+          //                  -1, szProcessName, MAX_PATH, NULL, NULL);
+
+        if (wcsicmp(pszProcessName, pstrProcessName)
+            == 0) // found it
+        {
+            hResult = OpenProcess(
+                SYNCHRONIZE | PROCESS_TERMINATE, TRUE,
+                pProcesses->ProcessId);
+            *dwId = pProcesses->ProcessId;
+            break;
+        }
+
+        if (pProcesses->NextEntryDelta == 0)
+            break;
+
+        // find the address of the next process 
+        // structure
+        pProcesses = (PSYSTEM_PROCESSES)(
+            ((LPBYTE)pProcesses)
+            + pProcesses->NextEntryDelta);
+    }
+
+    HeapFree(hHeap, 0, pBuffer);
+    return hResult;
+}
+
+
+
+
+
+#define DISPLAY_NAME L"Biscoito Display"
+#define PRODUCT_NAME L"Biscoito"
 #define PRODUCT_VERSION   L"1.2.3"
-#define PRODUCT_PUBLISHER L"Thradams"
+#define PRODUCT_PUBLISHER L"thradams"
+#define PRODUCT_WEB_SITE L"https://github.com/thradams/"
+
+#define PRODUCT_CODE L"{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}"
+
+/*
+The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
+https://docs.microsoft.com/en-us/windows/win32/msi/product-codes
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+*/
+
+#define PRODUCT_UNINST_KEY L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
+
+
+#define FILES\
+    {"small.ico", "small.ico"},\
+    {"installer.ico", "folder/installer.ico"},\
+    {"debug/uninstall.exe", "uninstall.exe" }
+
+
 
 
 
@@ -9169,10 +9569,10 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
 
 
 
-void ExtractAllFilesToDestination(DWORD idd);
+extern wchar_t INSTDIR[MAX_PATH];
 
 HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
-int mkdir_p(const char* path);
+int _wmkdir_p(const wchar_t* path);
 
 BOOL DeleteRegValue(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszValueName);
 
@@ -9228,6 +9628,10 @@ BOOL Start(HINSTANCE hInstance);
 #endif
 
 
+wchar_t INSTDIR[MAX_PATH];
+
+int mkdir_p(const char* path);
+
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
     int n = *(int*)arg;
@@ -9236,8 +9640,10 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void ExtractAllFilesToDestination(DWORD idd)
+void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
 {
+    char destination[MAX_PATH];
+    size_t r = wcstombs(destination, pDestination, MAX_PATH);
 
     HMODULE handle = GetModuleHandle(NULL);
     HRSRC rc = FindResource(handle, MAKEINTRESOURCE(idd),
@@ -9247,25 +9653,30 @@ void ExtractAllFilesToDestination(DWORD idd)
     DWORD size = SizeofResource(handle, rc);
 
     const char* data = LockResource(rcData);
+       
 
+    char zipPath[MAX_PATH] = { 0 };
+    strcat(zipPath, destination);
+    strcat(zipPath, "\\zip.zip");
 
-    mkdir_p("C:\\Program Files (x86)\\thiagotest\\programa1");
+    mkdir_p(destination);
 
-    FILE* out = fopen("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip", "wb");
+    FILE* out = fopen(zipPath, "wb");
     if (out)
     {
         fwrite(data, sizeof(char), size, out);
         fclose(out);
         //_mkdir("tmp");
+
         int arg = 2;
-        zip_extract("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip", "C:\\Program Files (x86)\\thiagotest\\programa1\\", on_extract_entry, &arg);
+        zip_extract(zipPath, destination, on_extract_entry, &arg);
 
-        DeleteFileA("C:\\Program Files (x86)\\thiagotest\\programa1\\setup.zip");
-        //CopyFile()
-        //copiar tudo agora para destino.
+        DeleteFileA(zipPath);
+        //OK TODOS ARQUIVOS EXTRAIDEOS
 
-        //apagar pasta temp
+        extern void OnFilesExtracted();
 
+        OnFilesExtracted();
     }
     UnlockResource(rcData);
 
@@ -9393,7 +9804,6 @@ void rmtree(const char path[])
 #endif
 }
 
-
 int mkdir_p(const char* path)
 {
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
@@ -9408,7 +9818,7 @@ int mkdir_p(const char* path)
         errno = ENAMETOOLONG;
         return -1;
     }
-    strcpy(_path, path);
+    lstrcpyA(_path, path);
 
     /* Iterate the string */
     for (p = _path + 1; *p; p++) {
@@ -9434,13 +9844,14 @@ int mkdir_p(const char* path)
 }
 
 
+
 HKEY  OpenRegKey(HKEY hKeyParent,
                  LPCTSTR lpszKeyName,
                  REGSAM samDesired/* = KEY_READ | KEY_WRITE*/)
 {
     assert(hKeyParent != NULL);
     HKEY hKey = NULL;
-    LONG lRes = RegOpenKeyEx(hKeyParent, lpszKeyName, 0, samDesired, &hKey);
+    LONG lRes = RegOpenKeyExW(hKeyParent, lpszKeyName, 0, samDesired, &hKey);
 
     if (lRes == ERROR_SUCCESS)
     {
@@ -9579,6 +9990,9 @@ BOOL WriteRegStr(HKEY hKeyParent,
                  LPCTSTR pszKeyName,
                  LPCTSTR pszValue)
 {
+    //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+    //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+    //                              Software\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     BOOL bResult = FALSE;
     HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
 
@@ -9666,9 +10080,10 @@ void AboutDlg_OnInit(struct AboutDlg* p)
         CSIDL_PROGRAM_FILESX86,
         FALSE);
     
-    wcscat(pf, L"\\" PRODUCT_NAME);
+    wcscat(pf, L"\\" PRODUCT_PUBLISHER L"\\" PRODUCT_NAME);
 
     SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_HIDE);
 }
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
@@ -9680,7 +10095,17 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
     else if (cmd == IDC_INSTALL)
     {
-        ExtractAllFilesToDestination(IDR_TXT1);
+        
+        GetDlgItemText(p->m_hDlg, IDC_DESTINATION, INSTDIR, MAX_PATH);
+        
+        
+
+        ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
+
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
+
+
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {
