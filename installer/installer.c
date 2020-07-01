@@ -6,6 +6,8 @@
 #include "zip.h"
 #include "resource.h"
 
+wchar_t INSTDIR[MAX_PATH];
+
 int mkdir_p(const char* path);
 
 int on_extract_entry(const char* filename, void* arg) {
@@ -218,7 +220,7 @@ HKEY  OpenRegKey(HKEY hKeyParent,
 {
     assert(hKeyParent != NULL);
     HKEY hKey = NULL;
-    LONG lRes = RegOpenKeyEx(hKeyParent, lpszKeyName, 0, samDesired, &hKey);
+    LONG lRes = RegOpenKeyExW(hKeyParent, lpszKeyName, 0, samDesired, &hKey);
 
     if (lRes == ERROR_SUCCESS)
     {
@@ -357,12 +359,15 @@ BOOL WriteRegStr(HKEY hKeyParent,
                  LPCTSTR pszKeyName,
                  LPCTSTR pszValue)
 {
+    //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+    //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+    //                              Software\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     BOOL bResult = FALSE;
-    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ /*| KEY_WRITE*/);
 
     if (hKey)
     {
-        RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
+        //RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
         RegCloseKey(hKey);
     }
     return bResult;
@@ -447,6 +452,7 @@ void AboutDlg_OnInit(struct AboutDlg* p)
     wcscat(pf, L"\\" PRODUCT_PUBLISHER L"\\" PRODUCT_NAME);
 
     SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_HIDE);
 }
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
@@ -458,10 +464,17 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
     else if (cmd == IDC_INSTALL)
     {
-        wchar_t destination[MAX_PATH];
-        GetDlgItemText(p->m_hDlg, IDC_DESTINATION, destination, MAX_PATH);
+        
+        GetDlgItemText(p->m_hDlg, IDC_DESTINATION, INSTDIR, MAX_PATH);
+        
+        
 
-        ExtractAllFilesToDestination(IDR_TXT1, destination);
+        ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
+
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
+
+
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {

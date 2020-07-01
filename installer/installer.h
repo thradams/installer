@@ -6,8 +6,9 @@
 #include <Windows.h>
 #include <Shlobj.h>
 #include "WindowsDesktop.h"
+#include "config.h"
 
-
+extern wchar_t INSTDIR[MAX_PATH];
 
 HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
 int _wmkdir_p(const wchar_t* path);

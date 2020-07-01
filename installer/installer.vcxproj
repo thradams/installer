@@ -93,7 +93,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel>HighestAvailable</UACExecutionLevel>
     </Link>
     <Manifest>
       <EnableDpiAwareness>true</EnableDpiAwareness>
@@ -163,6 +163,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="installer.h" />
     <ClInclude Include="miniz.h" />
+    <ClInclude Include="process.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="WindowsDesktop.h" />
     <ClInclude Include="zip.h" />
@@ -170,6 +171,7 @@
   <ItemGroup>
     <ClCompile Include="installer.c" />
     <ClCompile Include="installer_test.c" />
+    <ClCompile Include="process.c" />
     <ClCompile Include="WindowsDesktop.c" />
     <ClCompile Include="zip.c" />
   </ItemGroup>
