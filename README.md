@@ -50,6 +50,8 @@ Build order
 
 ```
 
+file script.c is used for other customizations. There is only one event today. 
+
 ## Solutions
 
 In case you contribute for this project then you need to understand what each project do:
