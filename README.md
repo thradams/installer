@@ -22,9 +22,11 @@ Then **ADD** these 3 existing projects in your solution: **installer** , **make_
 ![3](i3.png)
 
 You will see this
+
 ![4](i4.png)
 
 You can put these files inside a folder
+
 ![5](i5.png)
 
 ![6](i6.png)
