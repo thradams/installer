@@ -11,7 +11,7 @@ If you only need use the installer then all you need is installer_src.zip.
 
 ## Using it
 
-First you need to copy the folder installer into your project.
+First you need to copy the folder installer into your project. This folder is inside **installer_src.zip**
 
 ![1](i1.png)
 
