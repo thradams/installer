@@ -15,7 +15,7 @@ First you need to copy the folder installer into your project. This folder is in
 
 ![1](i1.png)
 
-Then ADD into your project installer , make_install_zip and unistall
+Then **ADD** these 3 existing projects in your solution: **installer** , **make_install_zip** and **unistall**
 
 ![2](i2.png)
 
