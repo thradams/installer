@@ -1,7 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(467,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (makezip.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  makezip.c
-C:\Users\thiago\source\repos\installer\make_install_zip\makezip.c(18,10): warning C4013: 'chdir' undefined; assuming extern returning int
-  zip.c
-C:\Users\thiago\source\repos\installer\make_install_zip\miniz.h(6089,45): warning C4244: 'return': conversion from 'mz_uint64' to 'mz_uint', possible loss of data
-  Generating Code...
-  make_install_zip.vcxproj -> C:\Users\thiago\source\repos\NativeCastle\Debug\make_install_zip.exe

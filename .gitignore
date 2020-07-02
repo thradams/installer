@@ -12,3 +12,15 @@
 /usetest/Debug
 /installer_src/installer
 /make_instaler_zip_src/Debug
+/.vs/installer/v16
+/Debug
+/installer/build/Debug
+/installer/installer/.vs/installer/v16
+/installer/installer/Debug
+/installer/make_instaler_zip_src/Debug
+/installer/make_instaler_zip_src/Release
+/installer/make_install_zip/Debug
+/installer/uninstall/Debug
+/installer/uninstall/Release
+/Release
+/installer/make_install_zip/Release

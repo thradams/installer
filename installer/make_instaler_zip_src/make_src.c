@@ -1,12 +1,23 @@
 
 #include "zip.h"
-
+#include <direct.h>
+#include <stdio.h>
 /*
  Este projeto monta um zip com todos os fontes para serem usados em outro projeto
 */
 int main()
 {
-    
+    //rodando de dentro do VS ele comeca no diretorio do projeto
+    chdir("../");
+
+    char cwd[MAX_PATH];
+    if (_getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working dir: %s\n", cwd);
+    }
+    else {
+        perror("getcwd() error");
+        return 1;
+    }
 
     struct finfo {
         const char* from;
@@ -39,8 +50,6 @@ int main()
         
     };
 
-    //vai para diretorio do installer
-    chdir("../");
 
     struct zip_t* zip = zip_open("installer_src.zip", ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
     {
@@ -48,7 +57,11 @@ int main()
         {
             zip_entry_open(zip, files[i].dest);
             {
-                zip_entry_fwrite(zip, files[i].from);
+                if (zip_entry_fwrite(zip, files[i].from) == -1)
+                {
+                    printf("Error %s", files[i].from);
+                    break;
+                }
             }
             zip_entry_close(zip);
         }

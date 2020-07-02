@@ -15,10 +15,23 @@
 #define SIZEOFARRAY(a) (sizeof(a) / sizeof(a[0]))
 int main()
 {
-    const char* donotexpand[] = { "config.h" };
-
     //vai para diretorio do installer
     chdir("../installer/");
+
+    char cwd[MAX_PATH];
+    if (_getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working dir: %s\n", cwd);
+    }
+    else {
+        perror("getcwd() error");
+        return 1;
+    }
+
+
+
+    const char* donotexpand[] = { "config.h" };
+
+
 
     //monta amalgamation
     const char* files[] = {

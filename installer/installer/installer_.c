@@ -9611,6 +9611,17 @@ BOOL Start(HINSTANCE hInstance);
 #endif
 
 
+/*HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
+https://docs.microsoft.com/en-us/windows/win32/msi/product-codes
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
+*/
+
+//#define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
+#define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
+
+
+
 wchar_t INSTDIR[MAX_PATH];
 
 int mkdir_p(const char* path);
@@ -10071,6 +10082,28 @@ void AboutDlg_OnInit(struct AboutDlg* p)
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_HIDE);
 }
 
+void WriteRegCommon()
+{
+    wchar_t uninst[MAX_PATH] = { 0 };
+    wcscat(uninst, INSTDIR);
+    wcscat(uninst, L"\\uninst.exe");
+    //criar GUID?
+
+    //https://docs.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"DisplayName", PRODUCT_NAME);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"UninstallString", uninst);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"DisplayIcon", uninst);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"DisplayVersion", PRODUCT_VERSION);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"URLInfoAbout", PRODUCT_WEB_SITE);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"Publisher", PRODUCT_PUBLISHER);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallLocation", INSTDIR);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSource", INSTDIR);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSourceFile", INSTDIR);
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoModify", L"1");
+    WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoRepair", L"1");
+}
+
+
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 {
     if (cmd == IDCANCEL)
@@ -10086,6 +10119,8 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         
 
         ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
+
+        WriteRegCommon();
 
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
@@ -10148,3 +10183,4 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 #undef PATH_REGISTRY_RECENT 
+#undef PRODUCT_UNINST_KEY 
