@@ -11,29 +11,32 @@ If you only need use the installer then all you need is installer_src.zip.
 
 ## Using it
 
-First you need to copy the folder installer into your project.
+First you need to copy the folder installer into your project. This folder is inside **installer_src.zip**
 
 ![1](i1.png)
 
-Then ADD into your project installer , make_install_zip and unistall
+Then **ADD** these 3 existing projects in your solution: **installer** , **make_install_zip** and **unistall**
 
 ![2](i2.png)
 
 ![3](i3.png)
 
 You will see this
+
 ![4](i4.png)
 
 You can put these files inside a folder
+
 ![5](i5.png)
 
 ![6](i6.png)
 
-Then edit the config.h you product details like names, id.
+
+Then **EDIT the config.h** with yout product details. Add the files you need to install.
+
 Run the project in a especific order. First build zip files then unistall then install. Add your exe and all other files you need.
 
 ![7](i7.png)
-
 
 You can especify the build order in your project and also compilation step to run make_install_zip.
 
@@ -46,6 +49,8 @@ Build order
  4) installer (this will create the intaller)
 
 ```
+
+file script.c is used for other customizations. There is only one event today. 
 
 ## Solutions
 
