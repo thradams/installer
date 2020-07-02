@@ -13,13 +13,26 @@ If you only need use the installer then all you need is installer_src.zip.
 
 First you need to copy the folder installer into your project.
 
-![1](img1.png)
-![2](img2.png)
-![3](img3.png)
-![4](img4.png)
-![5](img5.png)
-![6](img6.png)
-![7](img7.png)
+![1](i1.png)
+
+Then ADD into your project installer , make_install_zip and unistall
+
+![2](i2.png)
+
+![3](i3.png)
+
+You will see this
+![4](i4.png)
+
+You can put these files inside a folder
+![5](i5.png)
+
+![6](i6.png)
+
+Then edit the config.h you product details like names, id.
+Run the project in a especific order. First build zip files then unistall then install. Add your exe and all other files you need.
+
+![7](i7.png)
 
 
 
