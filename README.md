@@ -9,6 +9,19 @@ if you want to inprove the installer (adding more features etc) and help other p
 
 If you only need use the installer then all you need is installer_src.zip.
 
+## Using it
+
+First you need to copy the folder installer into your project.
+
+![1](img1.png)
+![2](img2.png)
+![3](img3.png)
+![4](img4.png)
+![5](img5.png)
+![6](img6.png)
+![7](img7.png)
+
+
 
 ## Solutions
 
