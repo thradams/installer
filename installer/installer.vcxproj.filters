@@ -11,15 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="miniz.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="zip.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowsDesktop.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="installer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -29,7 +20,7 @@
     <ClInclude Include="config.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="process.h">
+    <ClInclude Include="installer_.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,26 +38,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="teste.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="installer.c">
+    <ClCompile Include="installer_.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="zip.c">
+    <ClCompile Include="script.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsDesktop.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="installer_test.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="process.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="foo.zip" />
   </ItemGroup>
 </Project>

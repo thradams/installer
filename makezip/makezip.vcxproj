@@ -18,12 +18,21 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\make_install_zip\make_install_zip.c" />
+    <ClCompile Include="..\make_install_zip\zip.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\make_install_zip\miniz.h" />
+    <ClInclude Include="..\make_install_zip\zip.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{cb2cba47-aefd-4da8-b967-c2769c527013}</ProjectGuid>
     <RootNamespace>makezip</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>make_install_zip</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -138,14 +147,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="makezip.c" />
-    <ClCompile Include="zip.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="miniz.h" />
-    <ClInclude Include="zip.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

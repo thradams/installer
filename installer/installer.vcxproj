@@ -162,18 +162,12 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="installer.h" />
-    <ClInclude Include="miniz.h" />
-    <ClInclude Include="process.h" />
+    <ClInclude Include="installer_.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="WindowsDesktop.h" />
-    <ClInclude Include="zip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="installer.c" />
-    <ClCompile Include="installer_test.c" />
-    <ClCompile Include="process.c" />
-    <ClCompile Include="WindowsDesktop.c" />
-    <ClCompile Include="zip.c" />
+    <ClCompile Include="installer_.c" />
+    <ClCompile Include="script.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="installer.rc" />
@@ -181,12 +175,6 @@
   <ItemGroup>
     <Image Include="installer.ico" />
     <Image Include="small.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="teste.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="foo.zip" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

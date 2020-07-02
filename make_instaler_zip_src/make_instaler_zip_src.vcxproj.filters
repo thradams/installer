@@ -7,21 +7,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\installer\installer_test.c">
+    <ClCompile Include="make_src.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\installer\installer_.c">
+    <ClCompile Include="zip.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\installer\config.h">
+    <ClInclude Include="miniz.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\installer\installer.rc">
+    <ClInclude Include="zip.h">
       <Filter>Source Files</Filter>
-    </ResourceCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>
