@@ -131,7 +131,9 @@ int str_ends_with(const char* str, const char* suffix)
     return strcicmp(str + lenstr - lensuffix, suffix) == 0;
 }
 
-bool Write(const char* name, bool bHeaderMode, FILE* out, struct strlist_node** s_included)
+bool Write(const char* name, bool bHeaderMode, FILE* out, struct strlist_node** s_included,
+           const char* donotexpand[],
+           int donotexpandCount)
 {
 
     bool cppfile = str_ends_with(name, ".c");
@@ -278,8 +280,26 @@ bool Write(const char* name, bool bHeaderMode, FILE* out, struct strlist_node** 
 
                         if (!strlist_has(fileName, s_included))
                         {
-                            fputs("\n", out);
-                            if (!Write(fileName, bHeaderMode, out, s_included))
+                            bool bIgnore = false;
+                            for (int i = 0; i < donotexpandCount; i++)
+                            {
+                                if (strcmp(fileName, donotexpand[i]) == 0)
+                                {
+                                    bIgnore = true;
+                                        break;
+                                }
+
+                            }
+                            if (!bIgnore)
+                            {
+                                fputs("\n", out);
+                                if (!Write(fileName, bHeaderMode, out, s_included, donotexpand, donotexpandCount))
+                                {
+                                    fputs(linebuffer, out);
+                                    fputs("\n", out);
+                                }
+                            }
+                            else
                             {
                                 fputs(linebuffer, out);
                                 fputs("\n", out);
@@ -331,7 +351,9 @@ bool Write(const char* name, bool bHeaderMode, FILE* out, struct strlist_node** 
 }
 
 
-void amalgamate(const char* file_name_out, bool bHeaderMode, const char* files[], int count)
+void amalgamate(const char* file_name_out, bool bHeaderMode, const char* files[], int count,
+                const char* donotexpand[],
+                int donotexpandCount)
 {
     struct strlist_node* s_included = 0;
 
@@ -344,7 +366,7 @@ void amalgamate(const char* file_name_out, bool bHeaderMode, const char* files[]
 
             if (!strlist_has(files[i], &s_included))
             {
-                Write(files[i], bHeaderMode, out, &s_included);
+                Write(files[i], bHeaderMode, out, &s_included, donotexpand, donotexpandCount);
             }
 
         }

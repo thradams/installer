@@ -1,20 +1,21 @@
-#pragma once
 
 
-# //BEGIN_EXPORT
+
+
 #include <direct.h>
+
+
 #include <Windows.h>
+
+
 #include <Shlobj.h>
 
-# //END_EXPORT
 
 
-#include "WindowsDesktop.h"
 
 
-# //BEGIN_EXPORT
 
-#include "config.h"
+
 
 extern wchar_t INSTDIR[MAX_PATH];
 
@@ -31,4 +32,5 @@ BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR p
 
 
 BOOL Start(HINSTANCE hInstance);
-# //END_EXPORT
+
+

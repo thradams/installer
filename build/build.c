@@ -12,8 +12,11 @@
 //
 //
 
+#define SIZEOFARRAY(a) (sizeof(a) / sizeof(a[0]))
 int main()
 {
+    const char* donotexpand[] = { "config.h" };
+
     //vai para diretorio do installer
     chdir("../installer/");
 
@@ -25,6 +28,18 @@ int main()
         "Installer.c"
     };
 
-    amalgamate("installer_.c", /*bHeaderMode*/false, files, (sizeof(files) / sizeof(files[0])));
+    amalgamate("installer_.c",
+               /*bHeaderMode*/false, 
+               files, 
+               SIZEOFARRAY(files),
+               donotexpand,
+               SIZEOFARRAY(donotexpand));
+
+    //monta amalgamation header
+    const char* headers[] = {
+        "installer.h"        
+    };
+
+    amalgamate("installer_.h", /*bHeaderMode*/true, headers, (sizeof(headers) / sizeof(headers[0])), NULL , 0);
 
  }

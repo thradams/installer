@@ -1,8 +1,9 @@
 
 //vou colocar os eventos arqui
 
-#include "installer.h"
+#include "installer_.h"
 #include "process.h"
+#include "config.h"
 
 //https://www.codeguru.com/cpp/misc/misc/tools/article.php/c3851/ExeCreator-Utility.htm
 //https://www.codeproject.com/Articles/8826/Easy-Installer

@@ -230,6 +230,7 @@ HKEY  OpenRegKey(HKEY hKeyParent,
     return hKey;
 }
 
+
 inline LONG RegKey_QueryStringValue(HKEY hKey,
                                     LPCTSTR pszValueName,
                                     LPTSTR pszValue,
@@ -355,7 +356,7 @@ BOOL DeleteRegKey(HKEY hKeyParent,
 
 
 BOOL WriteRegStr(HKEY hKeyParent, 
-                 LPCTSTR pszSubkey,
+                 LPCTSTR lpszKeyName,
                  LPCTSTR pszKeyName,
                  LPCTSTR pszValue)
 {
@@ -363,9 +364,10 @@ BOOL WriteRegStr(HKEY hKeyParent,
     //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     //                              Software\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     BOOL bResult = FALSE;
-    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_ALL_ACCESS  /*| KEY_WRITE*/);
+    HKEY hKey = 0;
+    LONG lRes = RegCreateKeyExW(hKeyParent, lpszKeyName, 0, NULL, 0, KEY_READ | KEY_WRITE, NULL, &hKey, NULL);
 
-    if (hKey)
+    if (lRes == ERROR_SUCCESS)
     {
         RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
         RegCloseKey(hKey);

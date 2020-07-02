@@ -9534,40 +9534,22 @@ HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrPr
 }
 
 
-
-
-
-#define DISPLAY_NAME L"Biscoito Display"
-#define PRODUCT_NAME L"Biscoito"
-#define PRODUCT_VERSION   L"1.2.3"
-#define PRODUCT_PUBLISHER L"thradams"
-#define PRODUCT_WEB_SITE L"https://github.com/thradams/"
-
-#define PRODUCT_CODE L"{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}"
-
-/*
-The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
-https://docs.microsoft.com/en-us/windows/win32/msi/product-codes
-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
-*/
-
-#define PRODUCT_UNINST_KEY L"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
-
-
-#define FILES\
-    {"small.ico", "small.ico"},\
-    {"installer.ico", "folder/installer.ico"},\
-    {"debug/uninstall.exe", "uninstall.exe" }
-
-
-
-
+#include "config.h"
 
 
 //#pragma once
 
 
 
+
+
+
+
+
+
+
+
+#include "config.h"
 
 extern wchar_t INSTDIR[MAX_PATH];
 
@@ -9584,6 +9566,7 @@ BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR p
 
 
 BOOL Start(HINSTANCE hInstance);
+
 
 
 
@@ -9861,6 +9844,7 @@ HKEY  OpenRegKey(HKEY hKeyParent,
     return hKey;
 }
 
+
 inline LONG RegKey_QueryStringValue(HKEY hKey,
                                     LPCTSTR pszValueName,
                                     LPTSTR pszValue,
@@ -9986,7 +9970,7 @@ BOOL DeleteRegKey(HKEY hKeyParent,
 
 
 BOOL WriteRegStr(HKEY hKeyParent, 
-                 LPCTSTR pszSubkey,
+                 LPCTSTR lpszKeyName,
                  LPCTSTR pszKeyName,
                  LPCTSTR pszValue)
 {
@@ -9994,9 +9978,10 @@ BOOL WriteRegStr(HKEY hKeyParent,
     //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     //                              Software\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     BOOL bResult = FALSE;
-    HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
+    HKEY hKey = 0;
+    LONG lRes = RegCreateKeyExW(hKeyParent, lpszKeyName, 0, NULL, NULL, KEY_READ | KEY_WRITE, NULL, &hKey, NULL);
 
-    if (hKey)
+    if (lRes == ERROR_SUCCESS)
     {
         RegKey_SetStringValue(hKey, pszKeyName, pszValue, REG_SZ);
         RegCloseKey(hKey);
