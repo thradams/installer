@@ -35,8 +35,21 @@ Run the project in a especific order. First build zip files then unistall then i
 ![7](i7.png)
 
 
+You can especify the build order in your project and also compilation step to run make_install_zip.
+
+Build order
+```
+ 1) Your program
+ 2) unistall (creates the unistall program)
+ 3) make_install_zip (creates the files.zip with your program the unistall program and all your files)
+   You also needs to run make_install_zip
+ 4) installer (this will create the intaller)
+
+```
 
 ## Solutions
+
+In case you contribute for this project then you need to understand what each project do:
 
 ### build_amalgamation
  This solution builds the amalgamated (installer_.h and installer_.c) versions of all files needed.
