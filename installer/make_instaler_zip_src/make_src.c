@@ -33,7 +33,7 @@ int main()
         {"./installer/config.h", "installer/installer/config.h"},
         {"./installer/installer.vcxproj", "installer/installer/installer.vcxproj"},
 
-        {"./make_install_zip/make_install_zip.c", "installer/make_install_zip/make_install_zip.c"},
+        {"./make_install_zip/make_files_zip.c", "installer/make_install_zip/make_files_zip.c"},
         {"./make_install_zip/zip.c", "installer/make_install_zip/zip.c"},
         {"./make_install_zip/miniz.h", "installer/make_install_zip/miniz.h"},
         {"./make_install_zip/zip.h", "installer/make_install_zip/zip.h"},
