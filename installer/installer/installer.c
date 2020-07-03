@@ -6,6 +6,7 @@
 #include "zip.h"
 #include "resource.h"
 #include "reg.h"
+#include <windowsx.h>
 
 /*HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
 The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
@@ -30,7 +31,7 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
+void ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
 {
     char destination[MAX_PATH];
     size_t r = wcstombs(destination, pDestination, MAX_PATH);
@@ -43,7 +44,7 @@ void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
     DWORD size = SizeofResource(handle, rc);
 
     const char* data = LockResource(rcData);
-       
+
 
     char zipPath[MAX_PATH] = { 0 };
     strcat(zipPath, destination);
@@ -110,7 +111,7 @@ HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDes
             MultiByteToWideChar(CP_ACP, 0, lpszPathLink, -1, wsz, MAX_PATH);
 
             // Save the link by calling IPersistFile::Save. 
-            hres = ppf->lpVtbl->Save(ppf,wsz, TRUE);
+            hres = ppf->lpVtbl->Save(ppf, wsz, TRUE);
             ppf->lpVtbl->Release(ppf);
         }
         psl->lpVtbl->Release(psl);
@@ -236,6 +237,31 @@ struct AboutDlg
     HWND m_hParent;
 };
 
+void ShowPage(struct AboutDlg* p, int index)
+{
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_DEST_FRAME), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_FOLDER_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), index == 0 ? SW_SHOW : SW_HIDE);
+
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_LICENSE_LINK), index == 0 ? SW_SHOW : SW_HIDE);
+
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), index == 1 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_MESSAGE), index == 1 ? SW_SHOW : SW_HIDE);
+
+    //ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
+
+    //IDC_INSTALL_BUTTON
+    if (index == 2)
+    {
+        //esconde botao instalar
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON),  SW_HIDE);
+
+        //muda de cancel para close
+        SetWindowText(GetDlgItem(p->m_hDlg, IDCANCEL), L"Close");
+    }
+}
+
 void AboutDlg_OnInit(struct AboutDlg* p)
 {
     Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
@@ -245,11 +271,18 @@ void AboutDlg_OnInit(struct AboutDlg* p)
         pf,
         CSIDL_PROGRAM_FILESX86,
         FALSE);
-    
+
     wcscat(pf, L"\\" PRODUCT_PUBLISHER L"\\" PRODUCT_NAME);
 
     SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
-    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_HIDE);
+    SetWindowText(p->m_hDlg,  DISPLAY_NAME L" Installer");
+    SetDlgItemText(p->m_hDlg, IDC_PRODUCT_NAME, DISPLAY_NAME);
+    
+
+    //precisa dizer que concorda
+    EnableWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), FALSE);
+
+    ShowPage(p, 0);
 }
 
 void WriteRegCommon()
@@ -281,12 +314,17 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         EndDialog(p->m_hDlg, 1);
         PostQuitMessage(0);
     }
-    else if (cmd == IDC_INSTALL)
+    else if (cmd == IDC_AGREE_CHECK) 
     {
-        
+        int bChecked = Button_GetCheck(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK));        
+        EnableWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), bChecked);
+    }
+    else if (cmd == IDC_INSTALL_BUTTON)
+    {
+
         GetDlgItemText(p->m_hDlg, IDC_DESTINATION, INSTDIR, MAX_PATH);
-        
-        
+
+        ShowPage(p, 1);
 
         ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
 
@@ -295,7 +333,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
 
-
+        ShowPage(p, 2);
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {
