@@ -40,7 +40,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     _rmdir("default/.vscode");
     _rmdir("default");
-    _rmdir("../Castle");
+    _rmdir("./Castle");
 #define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
     RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY);
     //MSG msg;
@@ -53,7 +53,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //        
   //  }
 
-    MessageBox(NULL, L"Unistalled", L"Unistall", MB_OK);
+    MessageBox(NULL, DISPLAY_NAME L" unistalled", L"Unistall", MB_ICONINFORMATION |MB_OK);
     return 0;// (int)msg.wParam;
 }
 
