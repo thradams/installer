@@ -256,7 +256,7 @@ void WriteRegCommon()
 {
     wchar_t uninst[MAX_PATH] = { 0 };
     wcscat(uninst, INSTDIR);
-    wcscat(uninst, L"\\uninst.exe");
+    wcscat(uninst, L"\\uninstall.exe");
     //criar GUID?
 
     //https://docs.microsoft.com/en-us/windows/win32/msi/uninstall-registry-key

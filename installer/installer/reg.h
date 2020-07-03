@@ -14,4 +14,10 @@ void AddSystemVariablesPath(const wchar_t* pathToAdd);
 
 BOOL RegDelnode(HKEY hKeyRoot, LPTSTR lpSubKey);
 
+BOOL ReadRegStr(HKEY hKeyParent,
+                LPCTSTR pszSubkey,
+                LPCTSTR pszKeyName,
+                LPTSTR pszValue,
+                ULONG* pnChars);
+
 # //END_EXPORT

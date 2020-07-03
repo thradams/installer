@@ -19,7 +19,29 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+#define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
 
+    WCHAR value[MAX_PATH] = { 0 };
+    ULONG nChars = MAX_PATH;
+
+    BOOL b = ReadRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSource", value, &nChars);
+    if (b)
+    {
+        //este eh o lugar aonde esta instalado
+    }
+
+    //colocar neste diretorio
+    _wchdir(value);
+
+    char cwd[MAX_PATH];
+    if (_getcwd(cwd, sizeof(cwd)) != NULL) {
+
+        MessageBoxA(NULL, cwd, L"", MB_ICONINFORMATION);
+    }
+    else {
+
+        return 1;
+    }
 
     struct finfo {
         const char* from;
@@ -40,8 +62,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     _rmdir("default/.vscode");
     _rmdir("default");
+    
+    _wchdir(L"../");
     _rmdir("./Castle");
-#define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
+
+
     RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY);
     //MSG msg;
 
@@ -53,7 +78,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //        
   //  }
 
-    MessageBox(NULL, DISPLAY_NAME L" unistalled", L"Unistall", MB_ICONINFORMATION |MB_OK);
+    MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION |MB_OK);
     return 0;// (int)msg.wParam;
 }
 

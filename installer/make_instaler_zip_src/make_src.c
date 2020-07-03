@@ -40,6 +40,8 @@ int main()
         {"./make_install_zip/make_install_zip.vcxproj", "installer/make_install_zip/make_install_zip.vcxproj"},
 
         {"./uninstall/uninstall.c", "installer/uninstall/uninstall.c"},
+        {"./uninstall/uninstall_.c", "installer/uninstall/uninstall_.c"},
+        {"./uninstall/uninstall_.h", "installer/uninstall/uninstall_.h"},
         {"./uninstall/small.ico", "installer/uninstall/small.ico"},
         {"./uninstall/resource.h", "installer/uninstall/resource.h"},
         {"./uninstall/uninstall.ico", "installer/uninstall/uninstall.ico"},
