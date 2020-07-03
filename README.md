@@ -67,7 +67,10 @@ In case you contribute for this project then you need to understand what each pr
  
  ### installer
    This project creates the instaler. It uses the files.zip created by make_install_zip. It alo needs uninstall.exe created bt uninstall solution
-      
+ 
+ ### installer_debug
+   The same of installer but we can use the not almagamated version for easy edit.
+ 
  ### installer
    This project create uninstall.exe that is included inside the instalation and it is used when the program is unistalled.
    
