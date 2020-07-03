@@ -47,4 +47,6 @@ int main()
         }        
     }
     zip_close(zip);
+
+    printf("files.zip GENERATED\n");
 }

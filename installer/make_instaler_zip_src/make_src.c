@@ -69,4 +69,7 @@ int main()
         }
     }
     zip_close(zip);
+
+    printf("installer_src.zip GENERATED\n");
+
 }

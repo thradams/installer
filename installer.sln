@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "installer", "installer\installer\installer.vcxproj", "{C3EE420C-E474-4BAC-A7A5-FB6F37287B58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CB2CBA47-AEFD-4DA8-B967-C2769C527013} = {CB2CBA47-AEFD-4DA8-B967-C2769C527013}
+		{75E2A468-8522-4EE5-8E3E-651387F97587} = {75E2A468-8522-4EE5-8E3E-651387F97587}
+		{727015D1-5263-4E04-A4D4-3BABCC59A4FD} = {727015D1-5263-4E04-A4D4-3BABCC59A4FD}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "build_amalgamation", "installer\build\build.vcxproj", "{75E2A468-8522-4EE5-8E3E-651387F97587}"
 EndProject
@@ -13,7 +18,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "make_instaler_zip_src", "in
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "installer_debug", "installer\installer_debug\installer_debug.vcxproj", "{BE42D08A-8CDF-4CF6-BD2F-0A0CF2D7C2A0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "make_install_zip", "installer\make_install_zip\make_install_zip.vcxproj", "{CB2CBA47-AEFD-4DA8-B967-C2769C527013}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "make_files_zip", "installer\make_install_zip\make_install_zip.vcxproj", "{CB2CBA47-AEFD-4DA8-B967-C2769C527013}"
+	ProjectSection(ProjectDependencies) = postProject
+		{75E2A468-8522-4EE5-8E3E-651387F97587} = {75E2A468-8522-4EE5-8E3E-651387F97587}
+		{727015D1-5263-4E04-A4D4-3BABCC59A4FD} = {727015D1-5263-4E04-A4D4-3BABCC59A4FD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
