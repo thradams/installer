@@ -17,6 +17,9 @@
     <ClInclude Include="uninstall.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="uninstall_.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="uninstall.rc">
@@ -33,6 +36,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="uninstall.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uninstall_.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

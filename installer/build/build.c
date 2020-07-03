@@ -37,6 +37,7 @@ int main()
     const char* files[] = {
         "zip.c",
         "WindowsDesktop.c",
+        "reg.c",
         "Process.c",
         "Installer.c"
     };
@@ -47,6 +48,8 @@ int main()
                SIZEOFARRAY(files),
                donotexpand,
                SIZEOFARRAY(donotexpand));
+    
+    
 
     //monta amalgamation header
     const char* headers[] = {
@@ -55,4 +58,25 @@ int main()
 
     amalgamate("installer_.h", /*bHeaderMode*/true, headers, (sizeof(headers) / sizeof(headers[0])), NULL , 0);
 
+    //////////////////////////////////////
+
+    const char* uninstall_files[] = {
+        "reg.c"
+    };
+
+    amalgamate("../uninstall/uninstall_.c",
+               /*bHeaderMode*/false,
+               uninstall_files,
+               SIZEOFARRAY(uninstall_files),
+               NULL,
+               0);
+
+
+
+    //monta amalgamation header
+    const char* uninstall_headers[] = {
+        "reg.h"
+    };
+
+    amalgamate("../uninstall/uninstall_.h", /*bHeaderMode*/true, uninstall_headers, SIZEOFARRAY(uninstall_headers), NULL, 0);
  }
