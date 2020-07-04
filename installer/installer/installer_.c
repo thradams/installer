@@ -9171,6 +9171,12 @@ void AddSystemVariablesPath(const wchar_t* pathToAdd);
 
 BOOL RegDelnode(HKEY hKeyRoot, LPTSTR lpSubKey);
 
+BOOL ReadRegStr(HKEY hKeyParent,
+                LPCTSTR pszSubkey,
+                LPCTSTR pszKeyName,
+                LPTSTR pszValue,
+                ULONG* pnChars);
+
 
 
 
@@ -9602,6 +9608,8 @@ BOOL RegDelnode(HKEY hKeyRoot, LPTSTR lpSubKey)
 
 
 
+
+
 #include <tlhelp32.h>
 
 
@@ -9737,6 +9745,12 @@ HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrPro
 HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
 
 BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
+
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
+
+
+
+
 
 // Some definitions from NTDDK and other sources
 //
@@ -9975,6 +9989,41 @@ HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrPr
 }
 
 
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline)
+{
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+
+    // Start the child process. 
+    if (!CreateProcess(moduleName,   // No module name (use command line)
+        cmdline,        // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi)           // Pointer to PROCESS_INFORMATION structure
+        )
+    {
+        //printf("CreateProcess failed (%d).\n", GetLastError());
+        return;
+    }
+
+    // Wait until child process exits.
+    //WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Close process and thread handles. 
+    //CloseHandle(pi.hProcess);
+    //CloseHandle(pi.hThread);
+}
+
 #include "config.h"
 
 
@@ -10005,6 +10054,7 @@ BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR
 
 BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
 
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
 
 BOOL Start(HINSTANCE hInstance);
 
@@ -10031,12 +10081,19 @@ BOOL Start(HINSTANCE hInstance);
 #define IDR_ZIP1                        129
 #define IDR_TXT1                        130
 #define IDC_INSTALL                     1000
+#define IDC_INSTALL_BUTTON              1000
 #define IDC_PROGRESS1                   1001
 #define IDC_EDIT1                       1003
 #define IDC_DESTINATION                 1003
 #define IDC_FOLDER                      1004
+#define IDC_FOLDER_BUTTON               1004
 #define IDC_SYSLINK1                    1005
+#define IDC_LICENSE_LINK                1005
 #define IDC_CHECK1                      1006
+#define IDC_AGREE_CHECK                 1006
+#define IDC_DEST_FRAME                  1007
+#define IDC_MESSAGE                     1008
+#define IDC_PRODUCT_NAME                1009
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -10046,11 +10103,14 @@ BOOL Start(HINSTANCE hInstance);
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        131
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1007
+#define _APS_NEXT_CONTROL_VALUE         1010
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
 
+
+
+#include <windowsx.h>
 
 /*HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
 The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
@@ -10075,7 +10135,7 @@ int on_extract_entry(const char* filename, void* arg) {
     return 0;
 }
 
-void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
+void ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
 {
     char destination[MAX_PATH];
     size_t r = wcstombs(destination, pDestination, MAX_PATH);
@@ -10088,7 +10148,7 @@ void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
     DWORD size = SizeofResource(handle, rc);
 
     const char* data = LockResource(rcData);
-       
+
 
     char zipPath[MAX_PATH] = { 0 };
     strcat(zipPath, destination);
@@ -10117,6 +10177,7 @@ void ExtractAllFilesToDestination(DWORD idd, const wchar_t*  pDestination)
 
 
 }
+
 
 
 //#include "stdafx.h"
@@ -10164,7 +10225,7 @@ HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDes
             MultiByteToWideChar(CP_ACP, 0, lpszPathLink, -1, wsz, MAX_PATH);
 
             // Save the link by calling IPersistFile::Save. 
-            hres = ppf->lpVtbl->Save(ppf,wsz, TRUE);
+            hres = ppf->lpVtbl->Save(ppf, wsz, TRUE);
             ppf->lpVtbl->Release(ppf);
         }
         psl->lpVtbl->Release(psl);
@@ -10290,6 +10351,31 @@ struct AboutDlg
     HWND m_hParent;
 };
 
+void ShowPage(struct AboutDlg* p, int index)
+{
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_DEST_FRAME), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_FOLDER_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), index == 0 ? SW_SHOW : SW_HIDE);
+
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK), index == 0 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_LICENSE_LINK), index == 0 ? SW_SHOW : SW_HIDE);
+
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), index == 1 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_MESSAGE), index == 1 ? SW_SHOW : SW_HIDE);
+
+    //ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
+
+    //IDC_INSTALL_BUTTON
+    if (index == 2)
+    {
+        //esconde botao instalar
+        ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON),  SW_HIDE);
+
+        //muda de cancel para close
+        SetWindowText(GetDlgItem(p->m_hDlg, IDCANCEL), L"Close");
+    }
+}
+
 void AboutDlg_OnInit(struct AboutDlg* p)
 {
     Button_SetElevationRequiredState(GetDlgItem(p->m_hDlg, IDC_INSTALL), TRUE);
@@ -10299,11 +10385,18 @@ void AboutDlg_OnInit(struct AboutDlg* p)
         pf,
         CSIDL_PROGRAM_FILESX86,
         FALSE);
-    
+
     wcscat(pf, L"\\" PRODUCT_PUBLISHER L"\\" PRODUCT_NAME);
 
     SetDlgItemText(p->m_hDlg, IDC_DESTINATION, pf);
-    ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_HIDE);
+    SetWindowText(p->m_hDlg,  DISPLAY_NAME L" Installer");
+    SetDlgItemText(p->m_hDlg, IDC_PRODUCT_NAME, DISPLAY_NAME);
+    
+
+    //precisa dizer que concorda
+    EnableWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), FALSE);
+
+    ShowPage(p, 0);
 }
 
 void WriteRegCommon()
@@ -10335,12 +10428,17 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         EndDialog(p->m_hDlg, 1);
         PostQuitMessage(0);
     }
-    else if (cmd == IDC_INSTALL)
+    else if (cmd == IDC_AGREE_CHECK) 
     {
-        
+        int bChecked = Button_GetCheck(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK));        
+        EnableWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), bChecked);
+    }
+    else if (cmd == IDC_INSTALL_BUTTON)
+    {
+
         GetDlgItemText(p->m_hDlg, IDC_DESTINATION, INSTDIR, MAX_PATH);
-        
-        
+
+        ShowPage(p, 1);
 
         ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
 
@@ -10349,7 +10447,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
         ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
 
-
+        ShowPage(p, 2);
         MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
     }
     else if (cmd == IDC_FOLDER) {

@@ -61,7 +61,8 @@ int main()
     //////////////////////////////////////
 
     const char* uninstall_files[] = {
-        "reg.c"
+        "reg.c",
+        "process.c",
     };
 
     amalgamate("../uninstall/uninstall_.c",
@@ -75,7 +76,8 @@ int main()
 
     //monta amalgamation header
     const char* uninstall_headers[] = {
-        "reg.h"
+        "reg.h",
+        "process.h",
     };
 
     amalgamate("../uninstall/uninstall_.h", /*bHeaderMode*/true, uninstall_headers, SIZEOFARRAY(uninstall_headers), NULL, 0);

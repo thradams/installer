@@ -18,25 +18,54 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+    
+    
+    MessageBoxW(NULL, GetCommandLineW(), L"command line", MB_ICONINFORMATION);
+
+    //quando ele passa -u quer dizer que este quer fazer a desinstaladcao
+    BOOL bCopy = wcscmp(GetCommandLineW(), L"-u") != 0;
 
 #define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
 
     WCHAR value[MAX_PATH] = { 0 };
     ULONG nChars = MAX_PATH;
 
-    BOOL b = ReadRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSource", value, &nChars);
-    if (b)
+    if (GetModuleFileNameW(NULL, value, MAX_PATH) > 0)
     {
-        //este eh o lugar aonde esta instalado
+        //return 0;
     }
+
+    //BOOL b = ReadRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSource", value, &nChars);
+    //if (b)
+    //{
+        //este eh o lugar aonde esta instalado
+    //}
 
     //colocar neste diretorio
     _wchdir(value);
+    //wcscat(value, L"/uninstall.exe");
+
+    if (bCopy)
+    {
+        /*
+        quando uninstall.exe eh chamado sem nenhum argumento ele simplesmente
+        se copia para uma pasta temp e depois ele chama este exe da temp
+        para conseguir apaguar-se a si mesmo. lah no temp fica por enquanto
+        */
+        //MessageBoxW(NULL, L"Copying uninstall", L"command line", MB_ICONINFORMATION);
+        WCHAR tempPath[MAX_PATH] = { 0 };
+        DWORD dw = GetTempPathW(MAX_PATH, tempPath);
+        wcscat(tempPath, L"uninstall.exe");
+        CopyFile(value, tempPath, FALSE);        
+        SystemCreateProcess(tempPath, L"-u");
+        return 0;
+    }
+    
 
     char cwd[MAX_PATH];
     if (_getcwd(cwd, sizeof(cwd)) != NULL) {
 
-        MessageBoxA(NULL, cwd, L"", MB_ICONINFORMATION);
+        MessageBoxA(NULL, cwd, "", MB_ICONINFORMATION);
     }
     else {
 

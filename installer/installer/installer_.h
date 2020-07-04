@@ -30,6 +30,7 @@ BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR
 
 BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
 
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
 
 BOOL Start(HINSTANCE hInstance);
 

@@ -1,5 +1,7 @@
 #pragma once
 
+# //BEGIN_EXPORT
+
 #include <Windows.h>
 #include <tlhelp32.h>
 
@@ -136,3 +138,8 @@ HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrPro
 HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
 
 BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
+
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
+
+
+# //END_EXPORT
