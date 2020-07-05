@@ -31,6 +31,7 @@ int main()
         {"./installer/small.ico", "installer/installer/small.ico"},
         {"./installer/resource.h", "installer/installer/resource.h"},
         {"./installer/config.h", "installer/installer/config.h"},
+        {"./installer/license.rtf", "installer/installer/license.rtf"},
         {"./installer/installer.vcxproj", "installer/installer/installer.vcxproj"},
 
         {"./make_install_zip/make_files_zip.c", "installer/make_install_zip/make_files_zip.c"},

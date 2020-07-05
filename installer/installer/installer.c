@@ -7,6 +7,8 @@
 #include "resource.h"
 #include "reg.h"
 #include <windowsx.h>
+#include <richedit.h>
+
 
 /*HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
 The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
@@ -228,8 +230,36 @@ int mkdir_p(const char* path)
 
 
 
+struct LicenseDlg
+{
+    HWND m_hDlg;
+    HWND m_hParent;
+};
 
 
+void LicenseDlg_OnInit(struct LicenseDlg* p)
+{
+    HMODULE handle = GetModuleHandle(NULL);
+    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(IDR_RTF1),
+                            MAKEINTRESOURCE(257));
+    HGLOBAL rcData = LoadResource(handle, rc);
+    DWORD size = SizeofResource(handle, rc);
+    const char* data = LockResource(rcData);
+    SetTextEx(GetDlgItem(p->m_hDlg, IDC_RICHEDIT22), data, ST_DEFAULT, CP_ACP);
+    UnlockResource(rcData);    
+}
+
+void LicenseDlg_OnCommand(struct LicenseDlg* p, int cmd, int lparam, HWND h)
+{
+    if (cmd == IDCANCEL || cmd == IDOK)
+    {
+        EndDialog(p->m_hDlg, 1);
+    }
+}
+
+BEGIN_DLG_PROC(LicenseDlg)
+ON_COMMAND(LicenseDlg)
+END_DLG_PROC
 
 
 struct AboutDlg
@@ -307,7 +337,6 @@ void WriteRegCommon()
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoRepair", L"1");
 }
 
-
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 {
     if (cmd == IDCANCEL)
@@ -315,6 +344,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         EndDialog(p->m_hDlg, 1);
         PostQuitMessage(0);
     }
+  
     else if (cmd == IDC_AGREE_CHECK) 
     {
         int bChecked = Button_GetCheck(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK));        
@@ -354,8 +384,30 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 
 BEGIN_DLG_PROC(AboutDlg)
 ON_COMMAND(AboutDlg)
+ON_NOTIFY(AboutDlg)
 END_DLG_PROC
 
+
+BOOL AboutDlg_OnNotify(struct AboutDlg* p, DWORD cmd, NMHDR* pNMHDR)
+{
+    if (cmd == IDC_LICENSE_LINK)
+    {
+        if (pNMHDR->code == NM_CLICK)
+        {
+           
+
+            struct LicenseDlg dlg = {0};
+
+           INT_PTR r = ShowDialog(IDD_LICENSE,
+                                   &dlg,
+                                   p->m_hDlg,
+                                   LicenseDlg_ProcEx);
+            return TRUE; // handled, don't pass to DefWindowProc
+        }
+
+    }
+    return FALSE;
+}
 
 BOOL Start(HINSTANCE hInstance)
 {
@@ -377,6 +429,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+    
+    //this is necessary to use richedit controls
+    LoadLibrary(TEXT("Riched20.dll"));
 
     Start(hInstance);
 

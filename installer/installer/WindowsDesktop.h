@@ -41,6 +41,7 @@ HWND Create(void* pMain,
 #define BEGIN_WIN_PROC(N) \
 LRESULT CALLBACK JOIN(N, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)\
 {\
+  BOOL bHandled = FALSE;\
   struct MainWindow* pThis = 0;\
   if (message == WM_NCCREATE)\
   {\
@@ -74,6 +75,7 @@ LRESULT CALLBACK JOIN(N, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 #define BEGIN_DLG_PROC(DIALOGNAME) \
 LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)\
 {\
+  BOOL bHandled = FALSE;\
   struct DIALOGNAME* pThis = 0;\
   if (message == WM_INITDIALOG)\
   {\
@@ -99,9 +101,13 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
 
 
 
+//Typically, the dialog box procedure should return TRUE if it
+      //processed the message, and FALSE if it did not.
+      //If the dialog box procedure returns FALSE, the dialog manager
+      //performs the default dialog operation in response to the message.
 #define END_DLG_PROC\
   }\
-  return (INT_PTR)FALSE;\
+  return bHandled;\
 }
 
 
@@ -250,5 +256,18 @@ struct DLGITEMTEMPLATEEX
       JOIN(N, _OnCommand)(pThis, LOWORD(wParam), HIWORD(wParam), (HWND)lParam); \
  break;
 
+#define ON_NOTIFY(N)\
+  case WM_NOTIFY:\
+      {\
+         LPNMHDR p = (LPNMHDR)lParam;\
+         if (p)\
+          bHandled = JOIN(N, _OnNotify)(pThis, wParam, p);\
+      }\
+  break;
+
+
+
+
 BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);
 
+int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/);

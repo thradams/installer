@@ -1,7 +1,7 @@
 
 #define PRODUCT_VERSION   L"1.2.3"
 
-#define DISPLAY_NAME L"Install product Test Display" PRODUCT_VERSION
+#define DISPLAY_NAME L"Install product Test Display" L" " PRODUCT_VERSION
 #define PRODUCT_NAME L"Install product Test"
 
 #define PRODUCT_PUBLISHER L"Install Test Company"

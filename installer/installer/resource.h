@@ -14,6 +14,8 @@
 #define IDR_MAINFRAME                   128
 #define IDR_ZIP1                        129
 #define IDR_TXT1                        130
+#define IDD_LICENSE                     131
+#define IDR_RTF1                        132
 #define IDC_INSTALL                     1000
 #define IDC_INSTALL_BUTTON              1000
 #define IDC_PROGRESS1                   1001
@@ -28,6 +30,7 @@
 #define IDC_DEST_FRAME                  1007
 #define IDC_MESSAGE                     1008
 #define IDC_PRODUCT_NAME                1009
+#define IDC_RICHEDIT22                  1011
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -35,9 +38,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1010
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

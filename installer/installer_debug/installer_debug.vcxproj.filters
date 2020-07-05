@@ -78,5 +78,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\installer\files.zip" />
+    <None Include="..\installer\rtf1.bin">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\installer\license.rtf" />
   </ItemGroup>
 </Project>

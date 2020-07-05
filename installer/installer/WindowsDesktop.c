@@ -1,6 +1,7 @@
 #include "WindowsDesktop.h"
 #include <shlobj_core.h>
 #include <Shlobj.h>
+#include <Richedit.h>
 
 #pragma comment(lib, "Comctl32.lib")
 
@@ -711,3 +712,11 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
     return r;
 }
 
+
+int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/)
+{
+    SETTEXTEX ste = { 0 };
+    ste.flags = dwFlags;
+    ste.codepage = uCodePage;
+    return (int)SendMessage(hWnd, EM_SETTEXTEX, (WPARAM)&ste, (LPARAM)lpstrText);
+}

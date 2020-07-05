@@ -182,6 +182,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\installer\files.zip" />
+    <None Include="..\installer\license.rtf" />
+    <None Include="..\installer\rtf1.bin" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
