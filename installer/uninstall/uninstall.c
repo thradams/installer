@@ -22,10 +22,17 @@ void Finish()
     }
 
     WCHAR tempPath[MAX_PATH] = { 0 };
-    DWORD dw = GetTempPathW(MAX_PATH, tempPath);
+    DWORD dw = GetTempPathW(MAX_PATH, tempPath);    
     wcscat(tempPath, L"uninstall.exe");
     CopyFile(value, tempPath, FALSE);
-    SystemCreateProcess(tempPath, value);
+
+    WCHAR commandLine[MAX_PATH] = { 0 };
+    wcscat(commandLine, L"-d ");
+    if (GetModuleFileNameW(NULL, &commandLine[3], MAX_PATH - 4) > 0)
+    {
+    }
+
+    SystemCreateProcess(tempPath, commandLine);
 
     
     
@@ -41,17 +48,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
     
     
+    MessageBoxA(NULL, GetCommandLineA(), "COMMAND LINE", MB_ICONINFORMATION);
 
+    char* cmd = GetCommandLineA();
     //quando ele passa -u quer dizer que este quer fazer a desinstaladcao
-    BOOL bRemoveUninstall = wcslen(GetCommandLineW()) > 2;
+    BOOL bRemoveUninstall = (cmd[0] == '-' && cmd[1] == 'd');
     if (bRemoveUninstall)
     {
+        MessageBoxA(NULL, "deletar ", "COMMAND LINE", MB_ICONINFORMATION);
         //MessageBoxW(NULL, GetCommandLineW(), L"command line", MB_ICONINFORMATION);
         for (int i = 0; i < 100; i++)
         {
-            if (remove("unistall.exe") == 0)
+            if (remove(&cmd[3]) == 0)
             {
-                _rmdir("./Castle");
+                char* dir = &cmd[3];
+                int dirlen = strlen(dir);
+                dir[dirlen - sizeof("uninstall.exe")] = 0;
+                MessageBoxA(NULL, dir, "DIR", MB_ICONINFORMATION);
+                _rmdir(dir);
                 break;
             }
             else
