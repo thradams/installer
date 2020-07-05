@@ -8224,6 +8224,7 @@ HWND Create(void* pMain,
 #define BEGIN_WIN_PROC(N) \
 LRESULT CALLBACK JOIN(N, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)\
 {\
+  BOOL bHandled = FALSE;\
   struct MainWindow* pThis = 0;\
   if (message == WM_NCCREATE)\
   {\
@@ -8257,6 +8258,7 @@ LRESULT CALLBACK JOIN(N, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 #define BEGIN_DLG_PROC(DIALOGNAME) \
 LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)\
 {\
+  BOOL bHandled = FALSE;\
   struct DIALOGNAME* pThis = 0;\
   if (message == WM_INITDIALOG)\
   {\
@@ -8282,9 +8284,13 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
 
 
 
+//Typically, the dialog box procedure should return TRUE if it
+      //processed the message, and FALSE if it did not.
+      //If the dialog box procedure returns FALSE, the dialog manager
+      //performs the default dialog operation in response to the message.
 #define END_DLG_PROC\
   }\
-  return (INT_PTR)FALSE;\
+  return bHandled;\
 }
 
 
@@ -8433,8 +8439,21 @@ struct DLGITEMTEMPLATEEX
       JOIN(N, _OnCommand)(pThis, LOWORD(wParam), HIWORD(wParam), (HWND)lParam); \
  break;
 
+#define ON_NOTIFY(N)\
+  case WM_NOTIFY:\
+      {\
+         LPNMHDR p = (LPNMHDR)lParam;\
+         if (p)\
+          bHandled = JOIN(N, _OnNotify)(pThis, wParam, p);\
+      }\
+  break;
+
+
+
+
 BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);
 
+int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/);
 
 
 
@@ -8442,6 +8461,9 @@ BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir,
 
 
 #include <Shlobj.h>
+
+
+#include <Richedit.h>
 
 #pragma comment(lib, "Comctl32.lib")
 
@@ -9152,6 +9174,14 @@ INT_PTR ShowPropertySheet(HINSTANCE hInstance,
     return r;
 }
 
+
+int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/)
+{
+    SETTEXTEX ste = { 0 };
+    ste.flags = dwFlags;
+    ste.codepage = uCodePage;
+    return (int)SendMessage(hWnd, EM_SETTEXTEX, (WPARAM)&ste, (LPARAM)lpstrText);
+}
 
 
 
@@ -10080,6 +10110,8 @@ BOOL Start(HINSTANCE hInstance);
 #define IDR_MAINFRAME                   128
 #define IDR_ZIP1                        129
 #define IDR_TXT1                        130
+#define IDD_LICENSE                     131
+#define IDR_RTF1                        132
 #define IDC_INSTALL                     1000
 #define IDC_INSTALL_BUTTON              1000
 #define IDC_PROGRESS1                   1001
@@ -10094,6 +10126,7 @@ BOOL Start(HINSTANCE hInstance);
 #define IDC_DEST_FRAME                  1007
 #define IDC_MESSAGE                     1008
 #define IDC_PRODUCT_NAME                1009
+#define IDC_RICHEDIT22                  1011
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -10101,9 +10134,9 @@ BOOL Start(HINSTANCE hInstance);
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        131
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1010
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
@@ -10111,6 +10144,7 @@ BOOL Start(HINSTANCE hInstance);
 
 
 #include <windowsx.h>
+
 
 /*HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
 The product code is a GUID that is the principal identification of an application or product. For more information, see the ProductCode property. If significant changes are made to a product then the product code should also be changed to reflect this. It is not however a requirement that the product code be changed if the changes to the product are relatively minor.
@@ -10341,8 +10375,36 @@ int mkdir_p(const char* path)
 
 
 
+struct LicenseDlg
+{
+    HWND m_hDlg;
+    HWND m_hParent;
+};
 
 
+void LicenseDlg_OnInit(struct LicenseDlg* p)
+{
+    HMODULE handle = GetModuleHandle(NULL);
+    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(IDR_RTF1),
+                            MAKEINTRESOURCE(257));
+    HGLOBAL rcData = LoadResource(handle, rc);
+    DWORD size = SizeofResource(handle, rc);
+    const char* data = LockResource(rcData);
+    SetTextEx(GetDlgItem(p->m_hDlg, IDC_RICHEDIT22), data, ST_DEFAULT, CP_ACP);
+    UnlockResource(rcData);    
+}
+
+void LicenseDlg_OnCommand(struct LicenseDlg* p, int cmd, int lparam, HWND h)
+{
+    if (cmd == IDCANCEL || cmd == IDOK)
+    {
+        EndDialog(p->m_hDlg, 1);
+    }
+}
+
+BEGIN_DLG_PROC(LicenseDlg)
+ON_COMMAND(LicenseDlg)
+END_DLG_PROC
 
 
 struct AboutDlg
@@ -10420,7 +10482,6 @@ void WriteRegCommon()
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoRepair", L"1");
 }
 
-
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 {
     if (cmd == IDCANCEL)
@@ -10428,6 +10489,7 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
         EndDialog(p->m_hDlg, 1);
         PostQuitMessage(0);
     }
+  
     else if (cmd == IDC_AGREE_CHECK) 
     {
         int bChecked = Button_GetCheck(GetDlgItem(p->m_hDlg, IDC_AGREE_CHECK));        
@@ -10467,8 +10529,30 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 
 BEGIN_DLG_PROC(AboutDlg)
 ON_COMMAND(AboutDlg)
+ON_NOTIFY(AboutDlg)
 END_DLG_PROC
 
+
+BOOL AboutDlg_OnNotify(struct AboutDlg* p, DWORD cmd, NMHDR* pNMHDR)
+{
+    if (cmd == IDC_LICENSE_LINK)
+    {
+        if (pNMHDR->code == NM_CLICK)
+        {
+           
+
+            struct LicenseDlg dlg = {0};
+
+           INT_PTR r = ShowDialog(IDD_LICENSE,
+                                   &dlg,
+                                   p->m_hDlg,
+                                   LicenseDlg_ProcEx);
+            return TRUE; // handled, don't pass to DefWindowProc
+        }
+
+    }
+    return FALSE;
+}
 
 BOOL Start(HINSTANCE hInstance)
 {
@@ -10490,6 +10574,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+    
+    //this is necessary to use richedit controls
+    LoadLibrary(TEXT("Riched20.dll"));
 
     Start(hInstance);
 
