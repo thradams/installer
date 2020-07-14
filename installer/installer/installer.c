@@ -24,56 +24,109 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4
 wchar_t INSTDIR[MAX_PATH];
 
 int mkdir_p(const char* path);
+HWND s_hDlg = 0;
 
 int on_extract_entry(const char* filename, void* arg) {
     static int i = 0;
     int n = *(int*)arg;
-    printf("Extracted: %s (%d of %d)\n", filename, ++i, n);
-
+    char buffer[300] = {0};
+    snprintf(buffer, 300, "Extracted: %s (%d of %d)\n", filename, ++i, n);
+    
+    SetDlgItemTextA(s_hDlg, IDC_MESSAGE, buffer);
+    
     return 0;
 }
 
-void ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
+bool ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
 {
+    bool bResult = true;
+
     char destination[MAX_PATH];
     size_t r = wcstombs(destination, pDestination, MAX_PATH);
 
     HMODULE handle = GetModuleHandle(NULL);
-    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(idd),
-                            MAKEINTRESOURCE(256));
-    HGLOBAL rcData = LoadResource(handle, rc);
-
-    DWORD size = SizeofResource(handle, rc);
-
-    const char* data = LockResource(rcData);
-
-
-    char zipPath[MAX_PATH] = { 0 };
-    strcat(zipPath, destination);
-    strcat(zipPath, "\\zip.zip");
-
-    mkdir_p(destination);
-
-    FILE* out = fopen(zipPath, "wb");
-    if (out)
+    HRSRC rc = FindResource(handle, MAKEINTRESOURCE(idd), MAKEINTRESOURCE(256));
+    if (rc != NULL)
     {
-        fwrite(data, sizeof(char), size, out);
-        fclose(out);
-        //_mkdir("tmp");
+        HGLOBAL rcData = LoadResource(handle, rc);
+        if (rcData != NULL)
+        {
+            DWORD size = SizeofResource(handle, rc);
+            if (size != 0)
+            {
+                const char* data = LockResource(rcData);
+                if (data)
+                {
+                    char zipPath[MAX_PATH] = { 0 };
+                    strcat(zipPath, destination);
+                    strcat(zipPath, "\\zip.zip");
 
-        int arg = 2;
-        zip_extract(zipPath, destination, on_extract_entry, &arg);
+                    mkdir_p(destination);
 
-        DeleteFileA(zipPath);
-        //OK TODOS ARQUIVOS EXTRAIDEOS
+                    FILE* out = fopen(zipPath, "wb");
+                    if (out)
+                    {
+                        fwrite(data, sizeof(char), size, out);
+                        fclose(out);
 
-        extern void OnFilesExtracted();
+                        int arg = 2;
+                        int code = zip_extract(zipPath, destination, on_extract_entry, &arg);
+                        if (code == 0)
+                        {
+                            //ok arquivo extraido com sucesso
+                            bResult = true;
+                        }
+                        else
+                        {
+                            //erro ao extrair arquivo zip 
+                            bResult = false;
+                        }
 
-        OnFilesExtracted();
+                        //Remover o arquivo zip com sucesso ou falhar
+                        DeleteFileA(zipPath);
+
+                        if (bResult)
+                        {
+                            //Em caso de sucesso chamar funcao usuario
+                            extern void OnFilesExtracted();
+                            OnFilesExtracted();
+                        }
+                        else
+                        {
+                            //customizar erro?
+                        }
+                    }
+                    else
+                    {
+                        //Falha ao abrir arquivo de escrita do zip
+                        bResult = false;
+                    }
+                    UnlockResource(rcData);
+                }
+                else
+                {
+                    //Erro interno do instalador
+                    bResult = false;
+                }
+            }
+            else
+            {
+                //Erro interno do instalador
+                bResult = false;
+            }
+        }
+        else
+        {
+            //Erro interno do instalador
+            bResult = false;
+        }
     }
-    UnlockResource(rcData);
+    else
+    {
+        //Erro interno do instalador
+    }
 
-
+    return bResult;
 }
 
 
@@ -239,6 +292,7 @@ struct LicenseDlg
 
 void LicenseDlg_OnInit(struct LicenseDlg* p)
 {
+    
     HMODULE handle = GetModuleHandle(NULL);
     HRSRC rc = FindResource(handle, MAKEINTRESOURCE(IDR_RTF1),
                             MAKEINTRESOURCE(257));
@@ -270,6 +324,7 @@ struct AboutDlg
 
 void ShowPage(struct AboutDlg* p, int index)
 {
+    s_hDlg = p->m_hDlg;
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_DEST_FRAME), index == 0 ? SW_SHOW : SW_HIDE);
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_FOLDER_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), index == 0 ? SW_SHOW : SW_HIDE);
@@ -278,7 +333,7 @@ void ShowPage(struct AboutDlg* p, int index)
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_LICENSE_LINK), index == 0 ? SW_SHOW : SW_HIDE);
 
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), index == 1 ? SW_SHOW : SW_HIDE);
-    ShowWindow(GetDlgItem(p->m_hDlg, IDC_MESSAGE), index == 1 ? SW_SHOW : SW_HIDE);
+    ShowWindow(GetDlgItem(p->m_hDlg, IDC_MESSAGE), index != 0 ? SW_SHOW : SW_HIDE);
 
     //ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
 
@@ -316,8 +371,9 @@ void AboutDlg_OnInit(struct AboutDlg* p)
     ShowPage(p, 0);
 }
 
-void WriteRegCommon()
+bool WriteRegCommon()
 {
+    bool bResult = true;
     wchar_t uninst[MAX_PATH] = { 0 };
     wcscat(uninst, INSTDIR);
     wcscat(uninst, L"\\uninstall.exe");
@@ -335,6 +391,8 @@ void WriteRegCommon()
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSourceFile", INSTDIR);
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoModify", L"1");
     WriteRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"NoRepair", L"1");
+
+    return bResult;
 }
 
 void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
@@ -357,15 +415,28 @@ void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
 
         ShowPage(p, 1);
 
-        ExtractAllFilesToDestination(IDR_TXT1, INSTDIR);
+        if (ExtractAllFilesToDestination(IDR_TXT1, INSTDIR))
+        {
+            if (WriteRegCommon())
+            {
+                ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
+                ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
 
-        WriteRegCommon();
+                ShowPage(p, 2);
+                SetDlgItemTextA(s_hDlg, IDC_MESSAGE, "Instalação concluída com sucesso.");
+            }
+            else
+            {
+                MessageBoxA(p->m_hDlg, "Falha ao escrever registro do windows", "Install", MB_ICONERROR | MB_OK);
+            }
+        }
+        else
+        {
+            //falha ao extrair arquivos
+            MessageBoxA(p->m_hDlg, "Falha ao expandir arquivos de instalação", "Install", MB_ICONERROR | MB_OK);
+        }
 
-        ShowWindow(GetDlgItem(p->m_hDlg, IDC_DESTINATION), SW_HIDE);
-        ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), SW_SHOW);
-
-        ShowPage(p, 2);
-        MessageBoxA(p->m_hDlg, "Instalação concluida", "Install", MB_ICONINFORMATION | MB_OK);
+        
     }
     else if (cmd == IDC_FOLDER) {
 

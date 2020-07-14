@@ -47,5 +47,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="files.zip" />
+    <None Include="license.rtf" />
   </ItemGroup>
 </Project>
