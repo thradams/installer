@@ -21,5 +21,6 @@
     <ClInclude Include="zip.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\installer\targetver.h" />
   </ItemGroup>
 </Project>

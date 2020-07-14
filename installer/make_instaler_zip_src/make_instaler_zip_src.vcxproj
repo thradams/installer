@@ -155,6 +155,7 @@
     <ClCompile Include="zip.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\installer\targetver.h" />
     <ClInclude Include="miniz.h" />
     <ClInclude Include="zip.h" />
   </ItemGroup>
