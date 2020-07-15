@@ -12,6 +12,27 @@
 
 #define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
 
+DWORD GetModuleDir(HMODULE hModule, LPSTR   lpFilename, DWORD   nSize)
+{
+    if (GetModuleFileNameW(NULL, lpFilename, nSize) > 0)
+    {
+        //return 0;
+    }
+
+    wchar_t path_buffer[_MAX_PATH];
+    wchar_t drive[_MAX_DRIVE];
+    wchar_t dir[_MAX_DIR];
+    wchar_t fname[_MAX_FNAME];
+    wchar_t ext[_MAX_EXT];
+    _wsplitpath(lpFilename, drive, dir, fname, ext);
+
+    lpFilename[0] = 0;
+    wcscat(lpFilename, drive);
+    wcscat(lpFilename, dir);
+
+    return 1;
+}
+
 void Finish()
 {
     //A ultima fase do instalador eh copiar-se 
@@ -50,12 +71,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
     
-    
-    
-    MessageBoxA(NULL, GetCommandLineA(), "COMMAND LINE", MB_ICONINFORMATION);
 
     char* cmd = GetCommandLineA();
-    //quando ele passa -u quer dizer que este quer fazer a desinstaladcao
+    
+    //Ao passar -d significa que é a última fase e ele se auto deleta.
     BOOL bRemoveUninstall = (cmd[0] == '-' && cmd[1] == 'd');
     if (bRemoveUninstall)
     {
@@ -70,34 +89,40 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                 break;
             }
             else
+            {
+                //aguarda um pouco
                 Sleep(500);
+            }
         }
         return;
     }
 
 
 
-    WCHAR value[MAX_PATH] = { 0 };
+    WCHAR exePath[MAX_PATH] = { 0 };
     ULONG nChars = MAX_PATH;
 
-    if (GetModuleFileNameW(NULL, value, MAX_PATH) > 0)
+    if (GetModuleDir(NULL, exePath, MAX_PATH) > 0)
     {
         //return 0;
     }
 
-    _wchdir(value);
-
-    char cwd[MAX_PATH];
-    if (_getcwd(cwd, sizeof(cwd)) != NULL) {
-
-    }
-    else {
-
+    //Poe o current dir como sendo o path do exe
+    //
+    if (_wchdir(exePath) == -1)
+    {
+        //nao eh para acontecer isso nunca
+        MessageBoxA(NULL, "Error setting current dir", "Uninstall", MB_ICONERROR | MB_OK);
         return 1;
     }
 
+
+
     //Vamos remover todas as chaves do registro
-    RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY);
+    if (!RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY))
+    {
+        MessageBoxA(NULL, "Error removing registry keys", "Uninstall", MB_ICONERROR | MB_OK);
+    }
 
     //Depois remover todos os arquivos salvos
     struct finfo {
@@ -111,8 +136,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (remove(files[i].dest) != 0)
         {
             int e = errno;
-            MessageBox(NULL, L" Error removing file.", L" Unistall", MB_ICONERROR| MB_OK);
-            //continua
+            char errorMessage[MAX_PATH + 200];
+            snprintf(errorMessage, sizeof(errorMessage), "Error deleting file %s. (%d)", files[i].dest, e);            
+            MessageBoxA(NULL, errorMessage, "Uninstall",  MB_ICONERROR | MB_OK);            
         }
     }
 
