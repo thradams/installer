@@ -14,6 +14,13 @@
 
 void Finish()
 {
+    //A ultima fase do instalador eh copiar-se 
+    //para uma pasta temp e depois 
+    //apagar-se do lugar original
+    //junto com a pasta
+
+    //Esta funcao chama o desintalador da temp passando -d
+
     WCHAR value[MAX_PATH] = { 0 };
     ULONG nChars = MAX_PATH;
     if (GetModuleFileNameW(NULL, value, MAX_PATH) > 0)
@@ -33,11 +40,8 @@ void Finish()
     }
 
     SystemCreateProcess(tempPath, commandLine);
-
-    
-    
-
 }
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                       _In_opt_ HINSTANCE hPrevInstance,
                       _In_ LPWSTR    lpCmdLine,
@@ -55,16 +59,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     BOOL bRemoveUninstall = (cmd[0] == '-' && cmd[1] == 'd');
     if (bRemoveUninstall)
     {
-        MessageBoxA(NULL, "deletar ", "COMMAND LINE", MB_ICONINFORMATION);
-        //MessageBoxW(NULL, GetCommandLineW(), L"command line", MB_ICONINFORMATION);
         for (int i = 0; i < 100; i++)
         {
             if (remove(&cmd[3]) == 0)
             {
                 char* dir = &cmd[3];
                 int dirlen = strlen(dir);
-                dir[dirlen - sizeof("uninstall.exe")] = 0;
-                MessageBoxA(NULL, dir, "DIR", MB_ICONINFORMATION);
+                dir[dirlen - sizeof("uninstall.exe")] = 0;                
                 _rmdir(dir);
                 break;
             }
@@ -84,33 +85,25 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         //return 0;
     }
 
-    //BOOL b = ReadRegStr(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY, L"InstallSource", value, &nChars);
-    //if (b)
-    //{
-        //este eh o lugar aonde esta instalado
-    //}
-
-    //colocar neste diretorio
     _wchdir(value);
-    //wcscat(value, L"/uninstall.exe");
-
 
     char cwd[MAX_PATH];
     if (_getcwd(cwd, sizeof(cwd)) != NULL) {
 
-        MessageBoxA(NULL, cwd, "", MB_ICONINFORMATION);
     }
     else {
 
         return 1;
     }
 
+    //Vamos remover todas as chaves do registro
+    RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY);
+
+    //Depois remover todos os arquivos salvos
     struct finfo {
         const char* from;
         const char* dest;
     } files[] = { FILES };
-
-
 
 
     for (int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
@@ -118,30 +111,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         if (remove(files[i].dest) != 0)
         {
             int e = errno;
+            MessageBox(NULL, L" Error removing file.", L" Unistall", MB_ICONERROR| MB_OK);
+            //continua
         }
     }
 
-
+    //Remover pastas
     _rmdir("default/.vscode");
     _rmdir("default");
-    RegDelnode(HKEY_LOCAL_MACHINE, PRODUCT_UNINST_KEY);
 
-   
-
-    //MSG msg;
-
-    // Main message loop:
-    //while (GetMessage(&msg, NULL, 0, 0))
-    //{
-
-      //      DispatchMessage(&msg);
-//        
-  //  }
 
     MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION |MB_OK);
-    
+
+    //auto deletar-se
     Finish();
 
-    return 0;// (int)msg.wParam;
+    return 0;
 }
 

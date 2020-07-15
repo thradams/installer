@@ -32,8 +32,8 @@ int main()
         {"./installer/resource.h", "installer/installer/resource.h"},
         {"./installer/targetver.h", "installer/installer/targetver.h"},
 
-        {"./installer/config.h", "installer/installer/config.h"},
-        {"./installer/script.c", "installer/installer/script.c"},
+     //   {"./installer/config.h", "installer/installer/config.h"},
+     //   {"./installer/script.c", "installer/installer/script.c"},
 
         {"./installer/license.rtf", "installer/installer/license.rtf"},
         {"./installer/installer.vcxproj", "installer/installer/installer.vcxproj"},
