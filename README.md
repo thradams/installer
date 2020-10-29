@@ -4,7 +4,7 @@ Generate installer inside your normal VC++ build.
 
 ## Using it
 
- * Download **installer_src.zip**
+ * Download [installer_src.zip](installer/installer_src.zip)
  * **Copy** the folder **installer** into your project. 
    (This folder is inside installer_src.zip)
 
