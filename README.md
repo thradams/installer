@@ -31,39 +31,10 @@ I use this projects inside a folder
 ![6](i6.png)
 
 
-* **EDIT the config.h** with yout product details. 
-* Add the files you need to install.
+* **EDIT the config.h** with yout product details
 
+Sample:
 
-![7](i7.png)
-
-
-Required build order.
-
- 1) Your program
-
- 2) **unistall** 
-   Creates the uninstall.exe program
-
- 3) **make_install_zip** 
-    Creates the files.zip that is a embedded inside the installer
-    
- 4) **installer**
-    This will create the intaller.exe
-
-File script.c is used for customizations. 
-There is only one event today **OnFilesExtracted** that happens after files have been copied. 
-
-Once you understand the mechanics of the build you can use different approaches. Let's say
-you already have an build script then you can move the installer build to another solution.
-
-## Sample project (I was testing it)
-
-![7](screenshot.png)
-
-![8](screenshot2.png)
-
-My config.h
 ```cpp
 
 #define PRODUCT_VERSION   L"1.2.3"
@@ -75,6 +46,9 @@ My config.h
 
 #define PRODUCT_CODE L"{B1393753-AE0C-41D0-AC75-94C40DE17989}"
 
+/*
+  These files {source_path, dest_path} will be copied to the instalation dir
+*/
 #define FILES\
     {"release/uninstall.exe", "uninstall.exe" },\
     { "release/castle.exe", "castle.exe" },\
@@ -93,6 +67,36 @@ My config.h
     { "default/.vscode/launch.json", "default/.vscode/launch.json" },\
     { "default/.vscode/settings.json", "default/.vscode/settings.json" }
  ```
+ 
+![7](i7.png)
+
+
+Required build order.
+
+ 1) Your program
+
+ 2) **unistall** 
+   Creates the **uninstall.exe** program
+
+ 3) **make_install_zip** 
+    Creates the **make_files_zip.exe** programs that runs (Event After Build) and creates the **files.zip** that is a embedded inside the installer.exe.
+
+    
+ 4) **installer**
+    This will create the intaller.exe
+
+File script.c is used for customizations. 
+There is only one event today **OnFilesExtracted** that happens after files have been copied. 
+
+Once you understand the mechanics of the build you can use different approaches. Let's say
+you already have an build script then you can move the installer build to another solution.
+
+## Sample project (I was testing it)
+
+![7](screenshot.png)
+
+![8](screenshot2.png)
+
 
 script.c
 
