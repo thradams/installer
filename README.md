@@ -48,6 +48,66 @@ Build order
 
 file script.c is used for other customizations. There is only one event today. 
 
+## Sample project (I was testing it)
+
+![7](screenshot.png)
+
+My config.h
+```cpp
+
+#define PRODUCT_VERSION   L"1.2.3"
+#define DISPLAY_NAME L"Castle " PRODUCT_VERSION
+#define PRODUCT_NAME L"Castle"
+
+#define PRODUCT_PUBLISHER L"thradams"
+#define PRODUCT_WEB_SITE L"https://github.com/thradams/castle"
+
+#define PRODUCT_CODE L"{B1393753-AE0C-41D0-AC75-94C40DE17989}"
+
+#define FILES\
+    {"release/uninstall.exe", "uninstall.exe" },\
+    { "release/castle.exe", "castle.exe" },\
+    \
+    { "default/core.min.js", "default/core.min.js" },\
+    { "default/declarations.d.ts", "default/declarations.d.ts" },\
+    { "default/Home.html", "default/Home.html" },\
+    { "default/Home.ts", "default/Home.ts" },\
+    { "default/htmlcore.min.js", "default/htmlcore.min.js" },\
+    { "default/index.template.html", "default/index.template.html" },\
+    { "default/manifest.json", "default/manifest.json" },\
+    { "default/manifest.webmanifest", "default/manifest.webmanifest" },\
+    { "default/style.template.css", "default/style.template.css" },\
+    { "default/svgcore.min.js", "default/svgcore.min.js" },\
+    { "default/tsconfig.json", "default/tsconfig.json" },\
+    { "default/.vscode/launch.json", "default/.vscode/launch.json" },\
+    { "default/.vscode/settings.json", "default/.vscode/settings.json" }
+ ```
+
+script.c
+
+I want to add the install dir into the path. So I put some extra code
+at OnFilesExtracted event.
+
+```c
+/*
+     THIS IS THE CUSTOMIZATION FILE
+*/
+
+#include "installer_.h"
+#include "config.h"
+
+
+void AddSystemVariablesPath(const wchar_t* pathToAdd);
+
+void OnFilesExtracted()
+{
+  /*
+    This function is called after all files and common registry keys
+    were writtem    
+  */
+    AddSystemVariablesPath(INSTDIR);
+}
+```
 ## Contributing
 
 This section is necessary only if you want to contribute with the project and understand
