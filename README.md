@@ -20,7 +20,7 @@ Generate installer inside your normal VC++ build.
 
 ![3](i3.png)
 
-You will see this
+Result:
 
 ![4](i4.png)
 
@@ -34,23 +34,23 @@ I use this projects inside a folder
 * **EDIT the config.h** with yout product details. 
 * Add the files you need to install.
 
-Run the project in a especific order. First build zip files then unistall then install. Add your exe and all other files you need.
 
 ![7](i7.png)
 
-You can especify the build order in your project and also compilation step to run make_install_zip.
 
-Build order
-```
+Required build order.
+
  1) Your program
  2) unistall (creates the unistall program)
  3) make_install_zip (creates the files.zip with your program the unistall program and all your files)
    You also needs to run make_install_zip
  4) installer (this will create the intaller)
 
-```
+File script.c is used for other customizations. 
+There is only one event today **OnFilesExtracted** that happens after files have been copied. 
 
-file script.c is used for other customizations. There is only one event today. 
+Once you understand the mechanics of the build you can use different approaches. Let's say
+you already have an build script then you can move the installer build to another solution.
 
 ## Sample project (I was testing it)
 
