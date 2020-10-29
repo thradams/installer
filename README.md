@@ -10,7 +10,11 @@ Generate installer inside your normal VC++ build.
 
 ![1](i1.png)
 
- * **ADD** these 3 existing projects in your solution: **installer** , **make_install_zip** and **unistall**
+ **ADD** these 3 projects in your solution
+ 
+ * installer (This is the instaler project)
+ * make_install_zip  (This project creates the zip file)
+ * unistall (This is the uninstall program)
 
 ![2](i2.png)
 
@@ -20,7 +24,7 @@ You will see this
 
 ![4](i4.png)
 
-You can put these files inside a folder
+I use this projects inside a folder
 
 ![5](i5.png)
 
