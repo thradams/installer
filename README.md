@@ -27,7 +27,8 @@ You can put these files inside a folder
 ![6](i6.png)
 
 
-Then **EDIT the config.h** with yout product details. Add the files you need to install.
+* **EDIT the config.h** with yout product details. 
+* Add the files you need to install.
 
 Run the project in a especific order. First build zip files then unistall then install. Add your exe and all other files you need.
 
