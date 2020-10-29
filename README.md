@@ -52,6 +52,8 @@ file script.c is used for other customizations. There is only one event today.
 
 ![7](screenshot.png)
 
+![8](screenshot2.png)
+
 My config.h
 ```cpp
 
