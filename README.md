@@ -1,21 +1,16 @@
 # Embedded Install System - Zero dependencies
 
-
-This project creates source file (installer_src.zip) that contains source code with points of customization
-were you can create the installer for yor windows project without any other dependency.
-
-The objetive of this project is help the creation and test of the sources. installer_src.zip. In other words
-if you want to inprove the installer (adding more features etc) and help other people.
-
-If you only need use the installer then all you need is installer_src.zip.
+Generate installer inside your normal VC++ build.
 
 ## Using it
 
-First you need to copy the folder installer into your project. This folder is inside **installer_src.zip**
+ * Download **installer_src.zip**
+ * **Copy** the folder **installer** into your project. 
+   (This folder is inside installer_src.zip)
 
 ![1](i1.png)
 
-Then **ADD** these 3 existing projects in your solution: **installer** , **make_install_zip** and **unistall**
+ * **ADD** these 3 existing projects in your solution: **installer** , **make_install_zip** and **unistall**
 
 ![2](i2.png)
 
@@ -52,9 +47,10 @@ Build order
 
 file script.c is used for other customizations. There is only one event today. 
 
-## Solutions
+## Contributing
 
-In case you contribute for this project then you need to understand what each project do:
+This section is necessary only if you want to contribute with the project and understand
+how to use the projects/solutions.
 
 ### build_amalgamation
  This solution builds the amalgamated (installer_.h and installer_.c) versions of all files needed.
