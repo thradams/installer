@@ -41,12 +41,17 @@ I use this projects inside a folder
 Required build order.
 
  1) Your program
- 2) unistall (creates the unistall program)
- 3) make_install_zip (creates the files.zip with your program the unistall program and all your files)
-   You also needs to run make_install_zip
- 4) installer (this will create the intaller)
 
-File script.c is used for other customizations. 
+ 2) **unistall** 
+   Creates the uninstall.exe program
+
+ 3) **make_install_zip** 
+    Creates the files.zip that is a embedded inside the installer
+    
+ 4) **installer**
+    This will create the intaller.exe
+
+File script.c is used for customizations. 
 There is only one event today **OnFilesExtracted** that happens after files have been copied. 
 
 Once you understand the mechanics of the build you can use different approaches. Let's say
