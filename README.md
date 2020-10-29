@@ -1,9 +1,11 @@
 # Embedded Install System - Zero dependencies
 
+WARNING : THIS PROJECT NEEDS MORE DEVELOPMENT TO BECOME ROBUST.
+
 Generate windows installer inside your normal VC++ build.
 
 If you already use C/C++ and Visual Studio it means you can have
-an installer without any other dependencies.
+an installer without external dependencies.
 
 You can debug your installer and you don't need a crazy macro language 
 to customize your actions.
