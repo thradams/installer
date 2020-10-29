@@ -13,7 +13,7 @@ Generate installer inside your normal VC++ build.
  **ADD** these 3 projects in your solution
  
  * installer (This is the instaler project)
- * make_install_zip  (This project creates the zip file)
+ * make_install_zip  (This project creates the zip file that is embedded as a resource inside the installer)
  * unistall (This is the uninstall program)
 
 ![2](i2.png)
