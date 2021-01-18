@@ -19,9 +19,9 @@ to customize your actions.
 
  **ADD** these 3 projects in your solution
  
- * installer (This is the instaler project)
- * makezip  (This project creates the zip file that is embedded as a resource inside the installer)
- * unistall (This is the uninstall program)
+ * installer
+ * makezip
+ * unistall
 
 ![2](i2.png)
 
@@ -38,7 +38,7 @@ I use this projects inside a folder
 ![6](i6.png)
 
 
-* **EDIT the script.h** with yout product details
+* **EDIT the script.h** with your product details
 
 Sample:
 
@@ -92,7 +92,9 @@ Required build order.
     This will create the intaller.exe
 
 File script.c is used for customizations. 
+
 There is only one event today **OnFilesExtracted** that happens after files have been copied. 
+More events will be created on demand.
 
 Once you understand the mechanics of the build you can use different approaches. Let's say
 you already have an build script then you can move the installer build to another solution.
@@ -116,7 +118,6 @@ at OnFilesExtracted event.
 
 #include "installer_.h"
 #include "script.h"
-
 
 void AddSystemVariablesPath(const wchar_t* pathToAdd);
 
