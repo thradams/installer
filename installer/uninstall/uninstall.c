@@ -1,13 +1,8 @@
-// uninstall.cpp : Defines the entry point for the application.
-//
-
 #include <stdio.h>
-
 #include "..\installer\script.h"
 #include <direct.h>
 #include <Windows.h>
 #include <assert.h>
-#include <Windows.h>
 #include <tlhelp32.h>
 
 typedef LONG    NTSTATUS;
@@ -145,8 +140,8 @@ void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
 #include <Windows.h>
 
 static HKEY OpenRegKey(HKEY hKeyParent,
-                 LPCTSTR lpszKeyName,
-                 REGSAM samDesired/* = KEY_READ | KEY_WRITE*/)
+                       LPCTSTR lpszKeyName,
+                       REGSAM samDesired/* = KEY_READ | KEY_WRITE*/)
 {
     assert(hKeyParent != NULL);
     HKEY hKey = NULL;
@@ -161,9 +156,9 @@ static HKEY OpenRegKey(HKEY hKeyParent,
 }
 
 static LONG RegKey_QueryStringValue(HKEY hKey,
-                             LPCTSTR pszValueName,
-                             LPTSTR pszValue,
-                             ULONG* pnChars)
+                                    LPCTSTR pszValueName,
+                                    LPTSTR pszValue,
+                                    ULONG* pnChars)
 {
     LONG lRes;
     DWORD dwType;
@@ -254,8 +249,8 @@ static LONG RegKey_SetStringValue(
 }
 
 static BOOL DeleteRegValue(HKEY hKeyParent,
-                    LPCTSTR pszSubkey,
-                    LPCTSTR pszValueName)
+                           LPCTSTR pszSubkey,
+                           LPCTSTR pszValueName)
 {
     BOOL bResult = FALSE;
     HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
@@ -270,7 +265,7 @@ static BOOL DeleteRegValue(HKEY hKeyParent,
 
 
 static BOOL DeleteRegKey(HKEY hKeyParent,
-                  LPCTSTR pszSubkey)
+                         LPCTSTR pszSubkey)
 {
     BOOL bResult = FALSE;
     HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
@@ -285,9 +280,9 @@ static BOOL DeleteRegKey(HKEY hKeyParent,
 
 
 static BOOL WriteRegStr(HKEY hKeyParent,
-                 LPCTSTR lpszKeyName,
-                 LPCTSTR pszKeyName,
-                 LPCTSTR pszValue)
+                        LPCTSTR lpszKeyName,
+                        LPCTSTR pszKeyName,
+                        LPCTSTR pszValue)
 {
     //HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
     //Computador\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{A9E770C4-FCF1-4E52-A3B4-44D394886A3A}
@@ -305,10 +300,10 @@ static BOOL WriteRegStr(HKEY hKeyParent,
 }
 
 static BOOL ReadRegStr(HKEY hKeyParent,
-                LPCTSTR pszSubkey,
-                LPCTSTR pszKeyName,
-                LPTSTR pszValue,
-                ULONG* pnChars)
+                       LPCTSTR pszSubkey,
+                       LPCTSTR pszKeyName,
+                       LPTSTR pszValue,
+                       ULONG* pnChars)
 {
     BOOL bResult = FALSE;
     HKEY hKey = OpenRegKey(hKeyParent, pszSubkey, KEY_READ | KEY_WRITE);
@@ -666,8 +661,8 @@ static BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstr
 }
 //private:
 static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
-                               const WCHAR* pstrProcessName,
-                               DWORD* dwId)
+                                      const WCHAR* pstrProcessName,
+                                      DWORD* dwId)
 {
     if (!pThis->hKernelLib)
         return NULL;
@@ -728,7 +723,7 @@ static HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* 
 }
 
 static HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName,
-                                 DWORD* dwId)
+                                        DWORD* dwId)
 {
     HANDLE hHeap = pThis->FGetProcessHeap();
     NTSTATUS Status;
@@ -879,7 +874,7 @@ static void Finish()
     }
 
     WCHAR tempPath[MAX_PATH] = { 0 };
-    DWORD dw = GetTempPathW(MAX_PATH, tempPath);    
+    DWORD dw = GetTempPathW(MAX_PATH, tempPath);
     wcscat(tempPath, L"uninstall.exe");
     CopyFile(value, tempPath, FALSE);
 
@@ -899,10 +894,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-    
+
 
     char* cmd = GetCommandLineA();
-    
+
     //Ao passar -d significa que é a última fase e ele se auto deleta.
     BOOL bRemoveUninstall = (cmd[0] == '-' && cmd[1] == 'd');
     if (bRemoveUninstall)
@@ -913,7 +908,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             {
                 char* dir = &cmd[3];
                 int dirlen = strlen(dir);
-                dir[dirlen - sizeof("uninstall.exe")] = 0;                
+                dir[dirlen - sizeof("uninstall.exe")] = 0;
                 _rmdir(dir);
                 break;
             }
@@ -966,8 +961,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         {
             int e = errno;
             char errorMessage[MAX_PATH + 200];
-            snprintf(errorMessage, sizeof(errorMessage), "Error deleting file %s. (%d)", files[i].dest, e);            
-            MessageBoxA(NULL, errorMessage, "Uninstall",  MB_ICONERROR | MB_OK);            
+            snprintf(errorMessage, sizeof(errorMessage), "Error deleting file %s. (%d)", files[i].dest, e);
+            MessageBoxA(NULL, errorMessage, "Uninstall", MB_ICONERROR | MB_OK);
         }
     }
 
@@ -976,7 +971,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _rmdir("default");
 
 
-    MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION |MB_OK);
+    MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION | MB_OK);
 
     //auto deletar-se
     Finish();
