@@ -39,6 +39,8 @@ I use this projects inside a folder
 
 
 * **EDIT the script.h** with your product details
+* Change PRODUCT_CODE
+* Edit the document license.rtf
 
 Sample:
 
