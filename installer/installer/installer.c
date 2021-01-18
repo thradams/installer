@@ -8165,30 +8165,6 @@ out:
 
 extern HINSTANCE s_hInstance;
 
-static void FillSolidRect(HDC hDC, LPCRECT lpRect, COLORREF clr);
-
-static BOOL CenterWindow(HWND hWnd, HWND hWndCenter);
-
-static INT_PTR ShowDialog(DWORD idd,
-                   void* p,
-                   HWND hParent,
-                   DLGPROC lpDialogFunc);
-
-static HWND Create(void* pMain,
-            WNDPROC proc,
-            PCWSTR lpWindowClassName,
-            PCWSTR lpWindowName,
-            DWORD dwStyle,
-            DWORD dwExStyle,
-            HWND hWndParent,
-            UINT  MENUIDD,
-            UINT  ICON,
-            int x,
-            int y,
-            int nWidth,
-            int nHeight);
-
-//MACROS
 
 #define JOIN(A, B) A ## B
 
@@ -8217,14 +8193,10 @@ LRESULT CALLBACK JOIN(N, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM
   {
 
 
-
-
 #define END_WIN_PROC\
   }\
   return DefWindowProc(hWnd, message, wParam, lParam);\
 }
-
-
 
 #define BEGIN_DLG_PROC(DIALOGNAME) \
 LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)\
@@ -8253,8 +8225,6 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
   {
 
 
-
-
 //Typically, the dialog box procedure should return TRUE if it
       //processed the message, and FALSE if it did not.
       //If the dialog box procedure returns FALSE, the dialog manager
@@ -8263,7 +8233,6 @@ LRESULT CALLBACK JOIN(DIALOGNAME, _ProcEx)(HWND hWnd, UINT message, WPARAM wPara
   }\
   return bHandled;\
 }
-
 
 
 //local struct used for implementation
@@ -8319,36 +8288,6 @@ struct DLGITEMTEMPLATEEX
 #pragma pack(pop)
 
 
-/*WORD& DlgTemplateItemCount(_In_ DLGTEMPLATE* pTemplate)
-{
-    if (IsDialogEx(pTemplate))
-        return (DLGTEMPLATEEX*)(pTemplate)->cDlgItems;
-    else
-        return pTemplate->cdit;
-}*/
-
-/*inline static const WORD& DlgTemplateItemCount(_In_ const DLGTEMPLATE* pTemplate)
-{
-    if (IsDialogEx(pTemplate))
-        return (struct DLGTEMPLATEEX*)(pTemplate)->cDlgItems;
-    else
-        return pTemplate->cdit;
-}
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 //Desenha em um DC de memoria
 #define ONPAINTMEM(N)\
    case WM_PAINT:\
@@ -8373,16 +8312,6 @@ struct DLGITEMTEMPLATEEX
  }\
  break;
 
-//Desenha direto no DC
-#define ONPAINT(N)\
-    case WM_PAINT:\
-    {\
-      PAINTSTRUCT ps; \
-      HDC hdc = BeginPaint(hWnd, &ps); \
-        JOIN(N, _OnPaint)(pThis, hdc, &ps.rcPaint);\
-        EndPaint(hWnd, &ps);\
-        }\
-        break;
 
 #define ONCLOSE(N)\
          case WM_CLOSE:\
@@ -8420,20 +8349,8 @@ struct DLGITEMTEMPLATEEX
   break;
 
 
-
-
-BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH]);
-
-int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/);
-
-
-
 #include <shlobj_core.h>
-
-
 #include <Shlobj.h>
-
-
 #include <Richedit.h>
 
 #pragma comment(lib, "Comctl32.lib")
@@ -8457,50 +8374,6 @@ struct DialogTemplate
     DWORD m_dwTemplateSize;
     BOOL m_bSystemFont;
 };
-
-static void DrawBitmap(HDC hdc, HBITMAP hbm, int Left, int Top)
-{
-    BOOL f;
-    HDC hdcBits;
-    BITMAP bm;
-    hdcBits = CreateCompatibleDC(hdc);
-    GetObject(hbm, sizeof(BITMAP), &bm);
-    SelectObject(hdcBits, hbm);
-    f = BitBlt(hdc, Left, Top, bm.bmWidth, bm.bmHeight, hdcBits, 0, 0, SRCCOPY);
-    DeleteDC(hdcBits);
-}
-
-
-static void DrawImage(HDC hdc, RECT rc, LPCWSTR pszResourceName)
-{
-    UINT type = LR_CREATEDIBSECTION | LR_DEFAULTCOLOR;//LR_CREATEDIBSECTION | LR_DEFAULTSIZE;
-    HBITMAP hBitmap = 0;
-    hBitmap = (HBITMAP)LoadImage(GetModuleHandle(0),
-                                 pszResourceName,
-                                 IMAGE_BITMAP,
-                                 0,
-                                 0,
-                                 type);
-    if (hBitmap)
-    {
-        BITMAP bm;
-        GetObject(hBitmap, sizeof(BITMAP), &bm);
-
-        DrawBitmap(hdc, hBitmap, rc.left, rc.top);
-        DeleteObject(hBitmap);
-    }
-}
-
-void FillSolidRect(HDC hDC, LPCRECT lpRect, COLORREF clr)
-{
-    COLORREF clrOld = SetBkColor(hDC, clr);
-
-    if (clrOld != CLR_INVALID)
-    {
-        ExtTextOut(hDC, 0, 0, ETO_OPAQUE, lpRect, NULL, 0, NULL);
-        SetBkColor(hDC, clrOld);
-    }
-}
 
 static HWND Create(void* pMain,
             WNDPROC proc,
@@ -8609,21 +8482,6 @@ static BOOL HasFont(const DLGTEMPLATE* pTemplate)
             (IsDialogEx(pTemplate) ? ((struct DLGTEMPLATEEX*)pTemplate)->style :
             pTemplate->style));
 }
-
-/*
-BOOL HasFont(HGLOBAL m_hTemplate)
-{
-    if (m_hTemplate == NULL)
-    {
-        ASSERT(false);
-        return FALSE;
-    }
-    DLGTEMPLATE* pTemplate = (DLGTEMPLATE*)GlobalLock(m_hTemplate);
-    BOOL bHasFont = HasFont(pTemplate);
-    GlobalUnlock(m_hTemplate);
-    return bHasFont;
-}
-*/
 
 static BOOL DialogTemplate_SetFont(struct DialogTemplate* pThis, LPCWSTR lpFaceName, WORD nFontSize)
 {
@@ -8752,7 +8610,6 @@ static BOOL IsWindowsXPOrGreater()
 }
 
 
-
 static void GetSystemIconFont(wchar_t* strFontNameOut, int* nPointSize)
 {
     wcscpy(strFontNameOut, L"MS Shell Dlg"); // out
@@ -8784,7 +8641,6 @@ static void GetSystemIconFont(wchar_t* strFontNameOut, int* nPointSize)
         ASSERT(0);//
     }
 }
-
 
 static BOOL DialogTemplate_SetTemplate(struct DialogTemplate* pThis, const DLGTEMPLATE* pTemplate, UINT cb)
 {
@@ -8841,7 +8697,6 @@ static BOOL DialogTemplate_Load(struct DialogTemplate* pThis, HINSTANCE hInst, L
     FreeResource(hTemplate);
     return bSet;
 }
-
 
 
 static DWORD GetStyle(HWND hWnd)
@@ -8978,8 +8833,10 @@ INT CALLBACK BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 }
 
 
-
-static BOOL ShowSelectFolderDialog(HWND hwndOwner, LPCTSTR lpszTitle, LPCTSTR startDir, TCHAR szDir[MAX_PATH])
+static BOOL ShowSelectFolderDialog(HWND hwndOwner,
+                                   LPCTSTR lpszTitle,
+                                   LPCTSTR startDir,
+                                   TCHAR szDir[MAX_PATH])
 {
     //startDir pode ser null que eh tratado
     BROWSEINFO bInfo;
@@ -9144,7 +9001,9 @@ static INT_PTR ShowPropertySheet(HINSTANCE hInstance,
 }
 
 
-static int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/)
+static int SetTextEx(HWND hWnd,
+                     LPCTSTR lpstrText,
+                     DWORD dwFlags/* = ST_DEFAULT*/, UINT uCodePage/* = CP_ACP*/)
 {
     SETTEXTEX ste = { 0 };
     ste.flags = dwFlags;
@@ -9152,23 +9011,6 @@ static int SetTextEx(HWND hWnd, LPCTSTR lpstrText, DWORD dwFlags/* = ST_DEFAULT*
     return (int)SendMessage(hWnd, EM_SETTEXTEX, (WPARAM)&ste, (LPARAM)lpstrText);
 }
 
-
-
-
-//#pragma once
-
-
-
-
-static HKEY OpenRegKey(HKEY hKeyParent, LPCTSTR lpszKeyName, REGSAM samDesired);
-
-static LONG RegKey_QueryStringValue(HKEY hKey, LPCTSTR pszValueName, LPTSTR pszValue, ULONG* pnChars);
-
-static LONG RegKey_QueryDWORDValue(HKEY hKey, LPCTSTR pszValueName, DWORD* dwValue);
-
-static void AddSystemVariablesPath(const wchar_t* pathToAdd);
-
-static BOOL RegDelnode(HKEY hKeyRoot, LPTSTR lpSubKey);
 
 static BOOL ReadRegStr(HKEY hKeyParent,
                 LPCTSTR pszSubkey,
@@ -9265,8 +9107,7 @@ LONG RegKey_QueryDWORDValue(HKEY hKey, LPCTSTR pszValueName, DWORD* dwValue)
     return ERROR_SUCCESS;
 }
 
-static LONG RegKey_SetStringValue(
-    HKEY hKey,
+static LONG RegKey_SetStringValue(HKEY hKey,
     LPCTSTR pszValueName,
     LPCTSTR pszValue,
     DWORD dwType)
@@ -9583,10 +9424,6 @@ static BOOL RegDelnode(HKEY hKeyRoot, LPTSTR lpSubKey)
     // Recurse starts from root key, HKEY_CLASSES_ROOT
     return RegDelnodeRecurse(hKeyRoot, szDelKey);
 }
-
-#undef PATH_REGISTRY_RECENT 
-
-
 
 
 
@@ -10008,21 +9845,6 @@ static void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline)
 
 extern wchar_t INSTDIR[MAX_PATH];
 
-static HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc);
-int _wmkdir_p(const wchar_t* path);
-
-static BOOL DeleteRegValue(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszValueName);
-
-static BOOL DeleteRegKey(HKEY hKeyParent, LPCTSTR pszSubkey);
-
-static BOOL WriteRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPCTSTR pszValue);
-
-static BOOL ReadRegStr(HKEY hKeyParent, LPCTSTR pszSubkey, LPCTSTR pszKeyName, LPTSTR pszValue, ULONG* pnChars);
-
-static void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
-
-static BOOL Start(HINSTANCE hInstance);
-
 
 #include <wchar.h>
 
@@ -10199,10 +10021,6 @@ bool ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
 }
 
 
-
-//#include "stdafx.h"
-
-
 #include "winnls.h"
 
 HRESULT CreateShortCut(LPCWSTR lpszPathObj, LPCSTR lpszPathLink, LPCWSTR lpszDesc)
@@ -10348,13 +10166,11 @@ int mkdir_p(const char* path)
 }
 
 
-
 struct LicenseDlg
 {
     HWND m_hDlg;
     HWND m_hParent;
 };
-
 
 void LicenseDlg_OnInit(struct LicenseDlg* p)
 {
@@ -10400,8 +10216,6 @@ static void ShowPage(struct AboutDlg* p, int index)
 
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_PROGRESS1), index == 1 ? SW_SHOW : SW_HIDE);
     ShowWindow(GetDlgItem(p->m_hDlg, IDC_MESSAGE), index != 0 ? SW_SHOW : SW_HIDE);
-
-    //ShowWindow(GetDlgItem(p->m_hDlg, IDC_INSTALL_BUTTON), index == 0 ? SW_SHOW : SW_HIDE);
 
     //IDC_INSTALL_BUTTON
     if (index == 2)
@@ -10519,8 +10333,7 @@ static void AboutDlg_OnCommand(struct AboutDlg* p, int cmd, int lparam, HWND h)
     }
 }
 
-
-            
+          
 static BOOL AboutDlg_OnNotify(struct AboutDlg* p, DWORD cmd, NMHDR* pNMHDR)
 {
     if (cmd == IDC_LICENSE_LINK)
@@ -10550,7 +10363,7 @@ END_DLG_PROC
 
 #pragma endregion 
 
-static BOOL Start(HINSTANCE hInstance)
+static BOOL InstallerShowDialog(HINSTANCE hInstance)
 {
     s_hInstance = hInstance;
     struct AboutDlg dlg;
@@ -10573,7 +10386,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     //this is necessary to use richedit controls
     LoadLibrary(TEXT("Riched20.dll"));
 
-    Start(hInstance);
+    InstallerShowDialog(hInstance);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0))
