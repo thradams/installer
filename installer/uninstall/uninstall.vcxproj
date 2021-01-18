@@ -139,20 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="uninstall.h" />
-    <ClInclude Include="uninstall_.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="uninstall.c" />
-    <ClCompile Include="uninstall_.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="uninstall.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="small.ico" />
-    <Image Include="uninstall.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -161,13 +161,11 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="config.h" />
-    <ClInclude Include="installer.h" />
-    <ClInclude Include="installer_.h" />
+    <ClInclude Include="script.h" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="installer_.c" />
+    <ClCompile Include="installer.c" />
     <ClCompile Include="script.c" />
   </ItemGroup>
   <ItemGroup>
