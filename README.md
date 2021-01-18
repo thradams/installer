@@ -13,10 +13,8 @@ to customize your actions.
 
 ## Using it
 
-* Download [installer.zip](installer.zip)
+* Download the source code and copy only the installer folder to your project.
  
-* **Copy** the folder **installer** into your project. 
-
 ![1](i1.png)
 
  **ADD** these 3 projects in your solution
