@@ -13,7 +13,7 @@ to customize your actions.
 
 ## Using it
 
-* Download the source code and copy only the installer folder to your project.
+* Download the source code and **copy the installer folder to your project**.
  
 ![1](i1.png)
 
@@ -115,7 +115,7 @@ at OnFilesExtracted event.
 */
 
 #include "installer_.h"
-#include "config.h"
+#include "script.h"
 
 
 void AddSystemVariablesPath(const wchar_t* pathToAdd);
