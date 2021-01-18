@@ -13,7 +13,7 @@ to customize your actions.
 
 ## Using it
 
-* Download [installer.zip](installer/installer.zip)
+* Download [installer.zip](installer.zip)
  
 * **Copy** the folder **installer** into your project. 
 
