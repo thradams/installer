@@ -13,16 +13,16 @@ to customize your actions.
 
 ## Using it
 
- * Download [installer_src.zip](installer/installer_src.zip)
- * **Copy** the folder **installer** into your project. 
-   (This folder is inside installer_src.zip)
+* Download [installer.zip](installer/installer.zip)
+ 
+* **Copy** the folder **installer** into your project. 
 
 ![1](i1.png)
 
  **ADD** these 3 projects in your solution
  
  * installer (This is the instaler project)
- * make_install_zip  (This project creates the zip file that is embedded as a resource inside the installer)
+ * makezip  (This project creates the zip file that is embedded as a resource inside the installer)
  * unistall (This is the uninstall program)
 
 ![2](i2.png)
@@ -40,7 +40,7 @@ I use this projects inside a folder
 ![6](i6.png)
 
 
-* **EDIT the config.h** with yout product details
+* **EDIT the script.h** with yout product details
 
 Sample:
 
@@ -87,10 +87,9 @@ Required build order.
  2) **unistall** 
    Creates the **uninstall.exe** program
 
- 3) **make_install_zip** 
-    Creates the **make_files_zip.exe** programs that runs (Event After Build) and creates the **files.zip** that is a embedded inside the installer.exe.
+ 3) **makezip** 
+    Creates the **makezip.exe** programs that runs (Event After Build) and creates the **files.zip** that is a embedded inside the installer.exe.
 
-    
  4) **installer**
     This will create the intaller.exe
 
@@ -132,26 +131,4 @@ void OnFilesExtracted()
     AddSystemVariablesPath(INSTDIR);
 }
 ```
-## Contributing
 
-This section is necessary only if you want to contribute with the project and understand
-how to use the projects/solutions.
-
-### build_amalgamation
- This solution builds the amalgamated (installer_.h and installer_.c) versions of all files needed.
- 
- ### make_instaler_zip_src
- This solution creates the installer_src.zip that is the source code that the user must  include in their project to create installers.
- 
- ### make_install_zip
- This solution creates the files.zip that contains all files that are copied during instalation. We must create files.zip before run installer
- 
- ### installer
-   This project creates the instaler. It uses the files.zip created by make_install_zip. It alo needs uninstall.exe created bt uninstall solution
- 
- ### installer_debug
-   The same of installer but it does not use almagamated version for easy edit.
- 
- ### uninstall
-   This project create uninstall.exe that is included inside the instalation and it is used when the program is unistalled.
-   
