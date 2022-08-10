@@ -30,3 +30,6 @@
 /installer/installer_debug/Release
 /installer/installer_src/installer
 /installer/makezip/Debug
+/.vs
+/installer/.vs
+/installer/installer.exe

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <direct.h>
-#include "..\installer\script.h"
+#include "script.h"
 
 #pragma region zip
 /*
@@ -7861,7 +7861,8 @@ int zip_entry_fwrite(struct zip_t* zip, const char* filename) {
     memset((void*)&file_stat, 0, sizeof(struct MZ_FILE_STAT_STRUCT));
     if (MZ_FILE_STAT(filename, &file_stat) != 0) {
         // problem getting information - check errno
-        return -1;
+        int e = errno;
+        return e;// -1;
     }
 
     if ((file_stat.st_mode & 0200) == 0) {
@@ -8216,7 +8217,7 @@ out:
 int main()
 {
     //roda no diretorio mais acima de todos, da solution
-    _chdir("../../");
+    //_chdir("../../");
 
     char cwd[MAX_PATH];
     if (_getcwd(cwd, sizeof(cwd)) != NULL) {
@@ -8238,7 +8239,7 @@ int main()
 
 
     //joga o arquivo dentro do projeto do instalador
-    struct zip_t* zip = zip_open("./installer/installer/files.zip", ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+    struct zip_t* zip = zip_open("files.zip", ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
     {
         for (int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
         {
@@ -8249,6 +8250,8 @@ int main()
                     printf("ERROR %s\n", files[i].from);
                     break;
                 }
+                else
+                    printf("Added %s\n", files[i].from);
             }
             zip_entry_close(zip);
         }        

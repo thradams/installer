@@ -17,27 +17,6 @@ to customize your actions.
  
 ![1](i1.png)
 
- **ADD** these 3 projects in your solution
- 
- * installer
- * makezip
- * unistall
-
-![2](i2.png)
-
-![3](i3.png)
-
-Result:
-
-![4](i4.png)
-
-I use this projects inside a folder
-
-![5](i5.png)
-
-![6](i6.png)
-
-
 * **EDIT the script.h** with your product details
 * Change PRODUCT_CODE
 * Edit the document license.rtf
@@ -59,54 +38,15 @@ Sample:
   These files {source_path, dest_path} will be copied to the instalation dir
 */
 #define FILES\
-    {"release/uninstall.exe", "uninstall.exe" },\
-    { "release/castle.exe", "castle.exe" },\
-    \
-    { "default/core.min.js", "default/core.min.js" },\
-    { "default/declarations.d.ts", "default/declarations.d.ts" },\
-    { "default/Home.html", "default/Home.html" },\
-    { "default/Home.ts", "default/Home.ts" },\
-    { "default/htmlcore.min.js", "default/htmlcore.min.js" },\
-    { "default/index.template.html", "default/index.template.html" },\
-    { "default/manifest.json", "default/manifest.json" },\
-    { "default/manifest.webmanifest", "default/manifest.webmanifest" },\
-    { "default/style.template.css", "default/style.template.css" },\
-    { "default/svgcore.min.js", "default/svgcore.min.js" },\
-    { "default/tsconfig.json", "default/tsconfig.json" },\
-    { "default/.vscode/launch.json", "default/.vscode/launch.json" },\
-    { "default/.vscode/settings.json", "default/.vscode/settings.json" }
+#define FILES\
+    {"../x64/Debug/WindowsProject1.exe", "WindowsProject1.exe" },\
+    {"uninstall.exe", "uninstall.exe" }
  ```
- 
-![7](i7.png)
 
+![2](i2.png)
 
-Required build order.
-
- 1) Your program
-
- 2) **unistall** 
-   Creates the **uninstall.exe** program
-
- 3) **makezip** 
-    Creates the **makezip.exe** programs that runs (Event After Build) and creates the **files.zip** that is a embedded inside the installer.exe.
-
- 4) **installer**
-    This will create the intaller.exe
-
-File script.c is used for customizations. 
-
-There is only one event today **OnFilesExtracted** that happens after files have been copied. 
-More events will be created on demand.
-
-Once you understand the mechanics of the build you can use different approaches. Let's say
-you already have an build script then you can move the installer build to another solution.
-
-## Sample project (I was testing it)
-
-![7](screenshot.png)
-
-![8](screenshot2.png)
-
+![3](i3.png)
+![4](i4.png)
 
 script.c
 
@@ -132,4 +72,12 @@ void OnFilesExtracted()
     AddSystemVariablesPath(INSTDIR);
 }
 ```
+![6](screenshot.png)
+![7](screenshot2.png)
 
+To debug use
+```
+make_installer_debug.bat
+devenv /DebugExe installer.exe
+
+```
