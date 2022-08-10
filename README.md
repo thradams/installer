@@ -45,7 +45,10 @@ Sample:
 
 ![2](i2.png)
 
+Open the prompt
 ![3](i3.png)
+
+Run the bat file
 ![4](i4.png)
 
 script.c
