@@ -21,41 +21,21 @@ to customize your actions.
 * Change PRODUCT_CODE
 * Edit the document license.rtf
 
-Sample:
-
-```cpp
-
-#define PRODUCT_VERSION   L"1.2.3"
-#define DISPLAY_NAME L"Castle " PRODUCT_VERSION
-#define PRODUCT_NAME L"Castle"
-
-#define PRODUCT_PUBLISHER L"thradams"
-#define PRODUCT_WEB_SITE L"https://github.com/thradams/castle"
-
-#define PRODUCT_CODE L"{B1393753-AE0C-41D0-AC75-94C40DE17989}"
-
-/*
-  These files {source_path, dest_path} will be copied to the instalation dir
-*/
-#define FILES\
-#define FILES\
-    {"../x64/Debug/WindowsProject1.exe", "WindowsProject1.exe" },\
-    {"uninstall.exe", "uninstall.exe" }
- ```
-
 ![2](i2.png)
 
-Open the prompt
+Open the command prompt
 ![3](i3.png)
 
 Run the bat file
 ![4](i4.png)
 
-
+To create and debug use
+```
+make_installer_debug.bat
+devenv /DebugExe installer.exe
+```
 
 # Adding code into events on script.c
-
-
 
 ```c
 /*
@@ -79,9 +59,3 @@ void OnFilesExtracted()
 ![6](screenshot.png)
 ![7](screenshot2.png)
 
-To debug use
-```
-make_installer_debug.bat
-devenv /DebugExe installer.exe
-
-```
