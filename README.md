@@ -51,10 +51,11 @@ Open the prompt
 Run the bat file
 ![4](i4.png)
 
-script.c
 
-I want to add the install dir into the path. So I put some extra code
-at OnFilesExtracted event.
+
+# Adding code into events on script.c
+
+
 
 ```c
 /*
