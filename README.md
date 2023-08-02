@@ -1,15 +1,19 @@
 # Embedded Install System - Zero dependencies
 
-WARNING : THIS PROJECT NEEDS MORE DEVELOPMENT TO BECOME ROBUST.
-
-Generate windows installer inside your normal VC++ build.
-
 If you already use C/C++ and Visual Studio it means you can have
 an installer without external dependencies.
 
 You can debug your installer and you don't need a crazy macro language 
 to customize your actions.
 
+## Basic concepts
+The customization is done at script.h and script.c
+
+## Build Pipeline
+
+1 - Build the uninstall program (uninstall.exe).
+2 - Create a zip file (file.zip) that contains all the files including the uninstall.exe
+3 - Build the installer
 
 ## Using it
 
