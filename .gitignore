@@ -33,3 +33,6 @@
 /.vs
 /installer/.vs
 /installer/installer.exe
+/installer/makezip.exe
+/installer/makezip.obj
+*.obj
