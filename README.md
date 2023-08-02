@@ -63,3 +63,5 @@ void OnFilesExtracted()
 ![6](screenshot.png)
 ![7](screenshot2.png)
 
+## See also
+https://github.com/richgel999/miniz
