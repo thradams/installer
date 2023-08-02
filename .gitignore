@@ -36,3 +36,7 @@
 /installer/makezip.exe
 /installer/makezip.obj
 *.obj
+*.pdb
+/installer/files.zip
+/installer/uninstall.exe
+*.ilk
