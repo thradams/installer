@@ -59,6 +59,8 @@ int main(int argc, char** argv)
 ```
 
 
+New uninstall program. not integrated yet.
+
 ```c
 
 
