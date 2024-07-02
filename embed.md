@@ -57,3 +57,170 @@ int main(int argc, char** argv)
     }
 }
 ```
+
+
+```c
+
+
+/*
+  cl  /D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_DEBUG /D_WINDOWS  /D_UNICODE /DUNICODE uninstall.c 
+      kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib 
+      advapi32.lib shell32.lib ole32.lib oleaut32.lib 
+      uuid.lib odbc32.lib
+      /link /MANIFEST:EMBED /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'"
+*/
+
+#include <Windows.h>
+#include <strsafe.h>
+
+int ExecuteCommand(char * cmd)
+{
+    STARTUPINFOA si = { 0 };
+    PROCESS_INFORMATION pi = { 0 };
+    si.cb = sizeof(si);
+
+    // Create the new process
+    if (!CreateProcessA(
+        NULL,   // Application name
+        cmd,              // Command line arguments
+        NULL,              // Process handle not inheritable
+        NULL,              // Thread handle not inheritable
+        FALSE,             // Set handle inheritance to FALSE
+        0,                 // No creation flags
+        NULL,              // Use parent's environment block
+        NULL,              // Use parent's starting directory 
+        &si,               // Pointer to STARTUPINFO structure
+        &pi)               // Pointer to PROCESS_INFORMATION structure
+        )
+    {
+        return GetLastError();
+    }
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 0;
+}
+
+char * dirname(char * path)
+{
+    int last = -1;
+    for (int i = 0; path[i]; i++)
+    {
+        if (path[i] == '\\' || path[i] == '/')
+            last = i;
+    }
+
+    if (last != -1)
+    {
+        path[last] = 0;
+    }
+    return path;
+}
+
+void CreateTempUninstall()
+{
+    char currentDir[200];
+    DWORD r = GetModuleFileNameA(NULL, currentDir, sizeof currentDir);
+
+
+    char buffer[200];
+    r = GetTempPath2A(sizeof buffer, buffer);
+
+    char cmd[200] = { 0 };
+    StringCbCatA(cmd, sizeof cmd, buffer);
+    StringCbCatA(cmd, sizeof cmd, "sun.exe");
+
+    r = CopyFileA(currentDir, cmd, FALSE);
+    //r = MoveFileExA(cmd, NULL, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
+    if (!r)
+    {
+        r = GetLastError();        
+        MessageBoxA(NULL, "falha cipia", currentDir, MB_ICONERROR);
+        return;
+    }
+
+    char * d = dirname(currentDir);
+
+    cmd[0] = '\0';
+    StringCbCatA(cmd, sizeof cmd, buffer);
+    StringCbCatA(cmd, sizeof cmd, "un.exe ");    
+    StringCbCatA(cmd, sizeof cmd, currentDir);
+
+    ExecuteCommand(cmd);
+}
+
+void DoUninstall(const char * lpCmdLine)
+{
+    int r = MessageBoxA(NULL, "Tem certeza que deseja desintalar?", "Uninstall", MB_ICONQUESTION | MB_YESNO);
+    if (r != IDYES)
+    {
+        return;
+    }
+
+    char cmd[200] = {0};
+    
+    cmd[0] = '\0';
+    StringCbCatA(cmd, sizeof cmd, lpCmdLine);
+    StringCbCatA(cmd, sizeof cmd, "/uninstall.pdb");
+
+    if (DeleteFileA(cmd) == 0)
+    {
+        MessageBoxA(NULL, cmd, "", MB_OK);
+        return;
+    }
+
+    cmd[0] = '\0';
+    StringCbCatA(cmd, sizeof cmd, lpCmdLine);
+    StringCbCatA(cmd, sizeof cmd, "/uninstall.exe");
+    
+    int i = 0;
+    for (; i < 5; i++)
+    {
+        if (DeleteFileA(cmd))
+            break;
+        if (GetLastError() == ERROR_FILE_NOT_FOUND)
+        {         
+            break;
+        }        
+        Sleep(500);
+    }
+    if (i == 5)
+    {
+        MessageBoxA(NULL, cmd, "", MB_OK);
+    }
+    else
+    {
+        MessageBoxA(NULL, "sucesso", "", MB_OK);
+    }
+
+    if (RemoveDirectoryA(lpCmdLine))
+    {
+        MessageBoxA(NULL, "sucesso", "", MB_OK);
+    }
+    else
+    {
+        MessageBoxA(NULL, "falha remover dir", "", MB_OK);
+    }
+}
+
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPSTR    lpCmdLine,
+    _In_ int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    if (strlen(lpCmdLine) == 0)
+    {
+        CreateTempUninstall();
+    }
+    else
+    {
+        DoUninstall(lpCmdLine);
+    }
+
+    return 0;
+}
+
+```
