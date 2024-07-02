@@ -11,9 +11,13 @@ The customization is done at script.h and script.c
 
 ## Build Pipeline
 
-1 - Build the uninstall program (uninstall.exe).
-2 - Create a zip file (file.zip) that contains all the files including the uninstall.exe
-3 - Build the installer
+### 1 - Build the uninstall program (uninstall.exe).
+
+### 2 - Compile makezip, and run
+This will create a zip file (file.zip) that contains all the files including the uninstall.exe
+       
+### 3 - Build the installer
+This will include file.zip inside the resources.
 
 ## Using it
 
