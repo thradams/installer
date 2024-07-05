@@ -1,7 +1,5 @@
 #include "process.h"
-
 #include <tlhelp32.h>
-
 
 
 
@@ -9,7 +7,7 @@
 // Some definitions from NTDDK and other sources
 //
 // callback function for window enumeration
-static BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
+ BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
 {
     DWORD dwID;
 
@@ -24,7 +22,7 @@ static BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam)
 }
 
 
-static void KillProcess_Init(struct KillProcess* pThis) {
+ void KillProcess_Init(struct KillProcess* pThis) {
     pThis->FCreateToolhelp32Snapshot = NULL;
     pThis->FProcess32First = NULL;
     pThis->FProcess32Next = NULL;
@@ -75,14 +73,14 @@ static void KillProcess_Init(struct KillProcess* pThis) {
         }
     }
 }
-static void KillProcess_Destroy(struct KillProcess* pThis)
+ void KillProcess_Destroy(struct KillProcess* pThis)
 {
     if (pThis->hKernelLib)
         FreeLibrary(pThis->hKernelLib);
     if (pThis->hNTLib)
         FreeLibrary(pThis->hNTLib);
 }
-static BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName)
+ BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName)
 {
     DWORD dwId;
     HANDLE hProcess = KillProcess_FindProcess(pThis, pstrProcessName, &dwId);
@@ -106,7 +104,7 @@ static BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstr
     return bResult == TRUE;
 }
 //private:
-static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+ HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
                                const WCHAR* pstrProcessName,
                                DWORD* dwId)
 {
@@ -123,7 +121,7 @@ static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
     return NULL;
 }
 
-static HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId)
+ HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId)
 {
     HANDLE            hSnapShot = NULL;
     HANDLE            hResult = NULL;
@@ -167,7 +165,7 @@ static HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* 
         CloseHandle(hSnapShot);
     return hResult;
 }
-static HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrProcessName,
+ HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrProcessName,
                                     DWORD* dwId)
 {
     HANDLE hHeap = pThis->FGetProcessHeap();
@@ -255,7 +253,7 @@ void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline)
 
     // Start the child process. 
     if (!CreateProcess(moduleName,   // No module name (use command line)
-        cmdline,        // Command line
+        (WCHAR* )cmdline,        // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
         FALSE,          // Set handle inheritance to FALSE

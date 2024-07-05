@@ -120,40 +120,40 @@ struct KillProcess
     PFHeapFree                    FHeapFree;
 };
 
-static void KillProcess_Init(struct KillProcess* pThis);
-static void KillProcess_Destroy(struct KillProcess* pThis);
+void KillProcess_Init(struct KillProcess* pThis);
+void KillProcess_Destroy(struct KillProcess* pThis);
 
-static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
                                const WCHAR* pstrProcessName,
                                DWORD* dwId);
-static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
                                const WCHAR* pstrProcessName,
                                DWORD* dwId);
 
-static HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName,
+HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName,
                                  DWORD* dwId);
 
-static HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
+HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
 
-static BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
+BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
 
-static void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
+void SystemCreateProcess(const WCHAR* moduleName, const WCHAR* cmdline);
 
 
 // Some definitions from NTDDK and other sources
 //
 // callback function for window enumeration
-static BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam);
+BOOL CALLBACK TerminateAppEnum(HWND hwnd, LPARAM lParam);
 
 
-static void KillProcess_Init(struct KillProcess* pThis);
-static void KillProcess_Destroy(struct KillProcess* pThis);
-static BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
+void KillProcess_Init(struct KillProcess* pThis);
+void KillProcess_Destroy(struct KillProcess* pThis);
+BOOL KillProcess_KillProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName);
 //private:
-static HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
+HANDLE KillProcess_FindProcess(struct KillProcess* pThis,
                                const WCHAR* pstrProcessName,
                                DWORD* dwId);
 
-static HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
-static HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrProcessName,
+HANDLE KillProcess_THFindProcess(struct KillProcess* pThis, const WCHAR* pstrProcessName, DWORD* dwId);
+HANDLE KillProcess_NTFindProcess(struct KillProcess* pThis,  const WCHAR* pstrProcessName,
                                     DWORD* dwId);

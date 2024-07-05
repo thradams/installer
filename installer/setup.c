@@ -3,7 +3,7 @@
 */
 
 
-#include "script.h"
+#include "setup.h"
 #include "installer.h"
 
 void OnFilesExtracted()

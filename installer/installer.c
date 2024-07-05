@@ -2,11 +2,10 @@
 #include "process.h"
 #include "w32.h"
 #include "resource.h"
-#include "miniz.h"
 #include <stdio.h>
 #include <stdbool.h>
-#include "script.h"
-
+#include "setup.h"
+#include  "zip.h"
 
 #define ASSERT(x)
 

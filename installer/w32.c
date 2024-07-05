@@ -527,7 +527,7 @@ BOOL ShowSelectFolderDialog(HWND hwndOwner,
     bInfo.lpszTitle = lpszTitle;
     bInfo.ulFlags = BIF_NEWDIALOGSTYLE;
     bInfo.lpfn = BrowseCallbackProc;
-    bInfo.lParam = startDir;
+    bInfo.lParam = (LPARAM)startDir;
     bInfo.iImage = -1;
 
     LPITEMIDLIST lpItem = SHBrowseForFolder(&bInfo);
@@ -1280,3 +1280,23 @@ HWND Create(void* pMain,
 
 
 
+DWORD GetModuleDir(HMODULE hModule, LPTSTR   lpFilename, DWORD   nSize)
+{
+    if (GetModuleFileNameW(NULL, lpFilename, nSize) > 0)
+    {
+        //return 0;
+    }
+
+    //wchar_t path_buffer[_MAX_PATH];
+    wchar_t drive[_MAX_DRIVE];
+    wchar_t dir[_MAX_DIR];
+    wchar_t fname[_MAX_FNAME];
+    wchar_t ext[_MAX_EXT];
+    _wsplitpath(lpFilename, drive, dir, fname, ext);
+
+    lpFilename[0] = 0;
+    wcscat(lpFilename, drive);
+    wcscat(lpFilename, dir);
+
+    return 1;
+}
