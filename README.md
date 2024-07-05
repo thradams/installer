@@ -68,4 +68,5 @@ void OnFilesExtracted()
 ![7](screenshot2.png)
 
 ## See also
-https://github.com/richgel999/miniz
+
+https://github.com/kuba--/zip
