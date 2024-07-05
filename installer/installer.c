@@ -57,6 +57,7 @@ bool ExtractAllFilesToDestination(DWORD idd, const wchar_t* pDestination)
                     strcat(zipPath, "\\zip.zip");
 
                     mkdir_p(destination);
+                    //CreateDirectoryA
 
                     FILE* out = fopen(zipPath, "wb");
                     if (out)

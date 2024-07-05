@@ -54,3 +54,5 @@ HWND Create(void* pMain,
 
 
 int mkdir_p(const char* path);
+
+int ExecuteCommand(char * cmd);
