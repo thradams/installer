@@ -88,10 +88,13 @@ void CreateTempUninstall()
     StringCbCatA(cmd, sizeof cmd, "un.exe ");
     StringCbCatA(cmd, sizeof cmd, currentDir);
 
-    ExecuteCommand(cmd);
+    if (ExecuteCommand(cmd) != 0)
+    {
+        MessageBoxA(NULL, "Não foi possível executar o programa de desintalação", "currentDir", MB_ICONERROR);
+    }
 }
 
-void DoProgramUninstall()
+void DoProgramUninstall(const char * lpCmdLine)
 {
 
 
@@ -107,14 +110,21 @@ void DoProgramUninstall()
         const char * dest;
     } files[] = { FILES };
 
+    char filename[200] = { 0 };
+
 
     for (int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
     {
-        if (DeleteFileA(files[i].dest) == 0)
+        filename[0] = '\0';
+        StringCbCatA(filename, sizeof filename, lpCmdLine);
+        StringCbCatA(filename, sizeof filename, "/");
+        StringCbCatA(filename, sizeof filename, files[i].dest);
+
+        if (DeleteFileA(filename) == 0)
         {
-            int e = errno;
+            int e = GetLastError();
             char errorMessage[MAX_PATH + 200];
-            snprintf(errorMessage, sizeof(errorMessage), "Error deleting file %s. (%d)", files[i].dest, e);
+            snprintf(errorMessage, sizeof(errorMessage), "Error deleting file '%s'. (%d)", filename, e);
             MessageBoxA(NULL, errorMessage, "Uninstall", MB_ICONERROR | MB_OK);
         }
     }
@@ -127,12 +137,11 @@ void DoUninstall(const char * lpCmdLine)
         return;
     }
 
-    
-    DoProgramUninstall();
+
+    DoProgramUninstall(lpCmdLine);
 
 
 
-    MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION | MB_OK);
 
     //////////////////////////////////////////////////////////////////////////
     char cmd[200] = { 0 };
@@ -161,14 +170,34 @@ void DoUninstall(const char * lpCmdLine)
         //MessageBoxA(NULL, "sucesso", "", MB_OK);
     }
 
-    if (RemoveDirectoryA(lpCmdLine))
+    i = 0;
+    for (; i < 5; i++)
     {
-        //MessageBoxA(NULL, "sucesso", "", MB_OK);
+        if (RemoveDirectoryA(lpCmdLine))
+        {
+            MessageBoxA(NULL, lpCmdLine, "REMOVIDO", MB_OK);
+            break;
+        }
+        else
+        {
+            cmd[0] = '\0';
+            StringCbCatA(cmd, sizeof cmd, "'");
+            StringCbCatA(cmd, sizeof cmd, lpCmdLine);
+            StringCbCatA(cmd, sizeof cmd, "'");
+
+            int er = GetLastError();
+            char numberstr[20];
+            itoa(er, numberstr, 10);
+
+            StringCbCatA(cmd, sizeof cmd, " code=");
+            StringCbCatA(cmd, sizeof cmd, numberstr);
+
+            MessageBoxA(NULL, cmd, "FALHA", MB_OK);
+        }
     }
-    else
-    {
-        //MessageBoxA(NULL, "falha remover dir", "", MB_OK);
-    }
+
+    MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION | MB_OK);
+
 }
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,
