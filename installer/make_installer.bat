@@ -32,10 +32,13 @@ cl  /Od /MDd /RTC1 /D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_DEBUG /D_WINDOWS /D_UNIC
 /link /MANIFEST:EMBED /MANIFESTINPUT:"installer.exe.manifest" /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'"
 
 
-REM del makezip.exe
-REM del uninstall.exe
-REM del files.zip
+del makezip.exe
+del uninstall.exe
+del files.zip
 del *.pdb
 del *.obj
 del *.ilk
+
+REM to debug the installer use
+REM devenv /DebugExe installer.exe
 
