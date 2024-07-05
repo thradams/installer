@@ -6,7 +6,9 @@ REM 3 - Build installer
 
 cl  /D_CRT_SECURE_NO_WARNINGS /DWIN32 /D_DEBUG /D_WINDOWS  /D_UNICODE /DUNICODE ^
 uninstall.c w32.c process.c ^
-kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib /link /MANIFEST:EMBED /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'"
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib ^
+/link /MANIFEST:EMBED /MANIFESTINPUT:"installer.exe.manifest" /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'" 
+
 
 cl zip.c makezip.c -o makezip.exe
 if %errorlevel% neq 0 exit /b %errorlevel%

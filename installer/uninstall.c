@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <Windows.h>
+#include <strsafe.h>
+
 #include "..\installer\setup.h"
 #include <direct.h>
 #include <Windows.h>
@@ -12,90 +15,84 @@
 #define PRODUCT_UNINST_KEY L"Software\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" PRODUCT_CODE
 
 
-
-static void Finish()
+int ExecuteCommand(char * cmd)
 {
-    //A ultima fase do instalador eh copiar-se 
-    //para uma pasta temp e depois 
-    //apagar-se do lugar original
-    //junto com a pasta
+    STARTUPINFOA si = { 0 };
+    PROCESS_INFORMATION pi = { 0 };
+    si.cb = sizeof(si);
 
-    //Esta funcao chama o desintalador da temp passando -d
-
-    WCHAR value[MAX_PATH] = { 0 };
-    ULONG nChars = MAX_PATH;
-    if (GetModuleFileNameW(NULL, value, MAX_PATH) > 0)
+    // Create the new process
+    if (!CreateProcessA(
+        NULL,   // Application name
+        cmd,              // Command line arguments
+        NULL,              // Process handle not inheritable
+        NULL,              // Thread handle not inheritable
+        FALSE,             // Set handle inheritance to FALSE
+        0,                 // No creation flags
+        NULL,              // Use parent's environment block
+        NULL,              // Use parent's starting directory 
+        &si,               // Pointer to STARTUPINFO structure
+        &pi)               // Pointer to PROCESS_INFORMATION structure
+        )
     {
-        //return 0;
+        return GetLastError();
     }
 
-    WCHAR tempPath[MAX_PATH] = { 0 };
-    DWORD dw = GetTempPathW(MAX_PATH, tempPath);
-    wcscat(tempPath, L"uninstall.exe");
-    CopyFile(value, tempPath, FALSE);
-
-    WCHAR commandLine[MAX_PATH] = { 0 };
-    wcscat(commandLine, L"-d ");
-    if (GetModuleFileNameW(NULL, &commandLine[3], MAX_PATH - 4) > 0)
-    {
-    }
-
-    SystemCreateProcess(tempPath, commandLine);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    return 0;
 }
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                      _In_opt_ HINSTANCE hPrevInstance,
-                      _In_ LPWSTR    lpCmdLine,
-                      _In_ int       nCmdShow)
+char * dirname(char * path)
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
-
-
-    char* cmd = GetCommandLineA();
-
-    //Ao passar -d significa que é a última fase e ele se auto deleta.
-    BOOL bRemoveUninstall = (cmd[0] == '-' && cmd[1] == 'd');
-    if (bRemoveUninstall)
+    int last = -1;
+    for (int i = 0; path[i]; i++)
     {
-        for (int i = 0; i < 100; i++)
-        {
-            if (remove(&cmd[3]) == 0)
-            {
-                char* dir = &cmd[3];
-                int dirlen = strlen(dir);
-                dir[dirlen - sizeof("uninstall.exe")] = 0;
-                _rmdir(dir);
-                break;
-            }
-            else
-            {
-                //aguarda um pouco
-                Sleep(500);
-            }
-        }
-        return 0;
+        if (path[i] == '\\' || path[i] == '/')
+            last = i;
     }
 
-
-
-    WCHAR exePath[MAX_PATH] = { 0 };
-    ULONG nChars = MAX_PATH;
-
-    if (GetModuleDir(NULL, exePath, MAX_PATH) > 0)
+    if (last != -1)
     {
-        //return 0;
+        path[last] = 0;
+    }
+    return path;
+}
+
+void CreateTempUninstall()
+{
+    char currentDir[200];
+    DWORD r = GetModuleFileNameA(NULL, currentDir, sizeof currentDir);
+
+
+    char buffer[200];
+    r = GetTempPath2A(sizeof buffer, buffer);
+
+    char cmd[200] = { 0 };
+    StringCbCatA(cmd, sizeof cmd, buffer);
+    StringCbCatA(cmd, sizeof cmd, "un.exe");
+
+    r = CopyFileA(currentDir, cmd, FALSE);
+    //r = MoveFileExA(cmd, NULL, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
+    if (!r)
+    {
+        r = GetLastError();
+        MessageBoxA(NULL, "falha cipia", currentDir, MB_ICONERROR);
+        return;
     }
 
-    //Poe o current dir como sendo o path do exe
-    //
-    if (_wchdir(exePath) == -1)
-    {
-        //nao eh para acontecer isso nunca
-        MessageBoxA(NULL, "Error setting current dir", "Uninstall", MB_ICONERROR | MB_OK);
-        return 1;
-    }
+    char * d = dirname(currentDir);
 
+    cmd[0] = '\0';
+    StringCbCatA(cmd, sizeof cmd, buffer);
+    StringCbCatA(cmd, sizeof cmd, "un.exe ");
+    StringCbCatA(cmd, sizeof cmd, currentDir);
+
+    ExecuteCommand(cmd);
+}
+
+void DoProgramUninstall()
+{
 
 
     //Vamos remover todas as chaves do registro
@@ -106,14 +103,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     //Depois remover todos os arquivos salvos
     struct finfo {
-        const char* from;
-        const char* dest;
+        const char * from;
+        const char * dest;
     } files[] = { FILES };
 
 
     for (int i = 0; i < sizeof(files) / sizeof(files[0]); i++)
     {
-        if (remove(files[i].dest) != 0)
+        if (DeleteFileA(files[i].dest) == 0)
         {
             int e = errno;
             char errorMessage[MAX_PATH + 200];
@@ -121,16 +118,78 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             MessageBoxA(NULL, errorMessage, "Uninstall", MB_ICONERROR | MB_OK);
         }
     }
+}
+void DoUninstall(const char * lpCmdLine)
+{
+    int r = MessageBoxA(NULL, "Tem certeza que deseja desintalar?", "Uninstall", MB_ICONQUESTION | MB_YESNO);
+    if (r != IDYES)
+    {
+        return;
+    }
 
-    //Remover pastas
-    _rmdir("default/.vscode");
-    _rmdir("default");
+    
+    DoProgramUninstall();
+
 
 
     MessageBox(NULL, DISPLAY_NAME L" was successfully removed from  your computer.", DISPLAY_NAME L" Unistall", MB_ICONINFORMATION | MB_OK);
 
-    //auto deletar-se
-    Finish();
+    //////////////////////////////////////////////////////////////////////////
+    char cmd[200] = { 0 };
+
+    cmd[0] = '\0';
+    StringCbCatA(cmd, sizeof cmd, lpCmdLine);
+    StringCbCatA(cmd, sizeof cmd, "/uninstall.exe");
+
+    int i = 0;
+    for (; i < 5; i++)
+    {
+        if (DeleteFileA(cmd))
+            break;
+        if (GetLastError() == ERROR_FILE_NOT_FOUND)
+        {
+            break;
+        }
+        Sleep(500);
+    }
+    if (i == 5)
+    {
+        //MessageBoxA(NULL, cmd, "", MB_OK);
+    }
+    else
+    {
+        //MessageBoxA(NULL, "sucesso", "", MB_OK);
+    }
+
+    if (RemoveDirectoryA(lpCmdLine))
+    {
+        //MessageBoxA(NULL, "sucesso", "", MB_OK);
+    }
+    else
+    {
+        //MessageBoxA(NULL, "falha remover dir", "", MB_OK);
+    }
+}
+
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_ LPSTR    lpCmdLine,
+    _In_ int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    //this is necessary to use richedit controls
+    //LoadLibrary(TEXT("Riched20.dll"));
+
+    if (strlen(lpCmdLine) == 0)
+    {
+        CreateTempUninstall();
+    }
+    else
+    {
+        DoUninstall(lpCmdLine);
+    }
 
     return 0;
 }
