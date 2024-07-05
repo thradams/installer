@@ -7,17 +7,20 @@ You can debug your installer and you don't need a crazy macro language
 to customize your actions.
 
 ## Basic concepts
-The customization is done at script.h and script.c
+The customization is done at **setup.h** and **setup.c**
+
 
 ## Build Pipeline
 
-### 1 - Build the uninstall program (uninstall.exe).
+### 0 - Build the sofware you want to create the installer
 
-### 2 - Compile makezip, and run
-This will create a zip file (file.zip) that contains all the files including the uninstall.exe
+### 1 - Build the uninstall program
+
+### 2 - Create a zip file with all files required
        
 ### 3 - Build the installer
-This will include file.zip inside the resources.
+
+This pipeline is inside make_installer.bat 
 
 ## Using it
 
@@ -25,7 +28,7 @@ This will include file.zip inside the resources.
  
 ![1](i1.png)
 
-* **EDIT the script.h** with your product details
+* **EDIT the setp.h** with your product details
 * Change PRODUCT_CODE
 * Edit the document license.rtf
 
@@ -43,7 +46,7 @@ make_installer_debug.bat
 devenv /DebugExe installer.exe
 ```
 
-# Adding code into events on script.c
+# Adding code into events on setup.c
 
 ```c
 /*
